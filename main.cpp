@@ -270,6 +270,13 @@ int main()
     // Projection matrix of the camera: FOV angle, aspect ratio, near and far planes
     glm::mat4 projection = glm::perspective(45.0f, (float)screenWidth/(float)screenHeight, 0.1f, 50.0f);
 
+    GLuint colorSSBO;
+    glGenBuffers(1, &colorSSBO);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, colorSSBO); 
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::ivec4) * width * height, nullptr, GL_DYNAMIC_COPY);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, colorSSBO);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
     // Rendering loop: this code is executed at each frame
     while(!glfwWindowShouldClose(window))
     {
@@ -283,6 +290,11 @@ int main()
         glfwPollEvents();
         // we apply FPS camera movements
         apply_camera_movements();
+
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, colorSSBO); 
+        GLint zero = 0;
+        glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32I, GL_RED_INTEGER, GL_INT, &zero);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
         illumin_shader.Use();
         glUniformMatrix4fv(glGetUniformLocation(illumin_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -325,7 +337,13 @@ int main()
         glUniformMatrix4fv(glGetUniformLocation(stereogram_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
 
         RenderObjects(stereogram_shader, planeModel, cubeModel, sphereModel, bunnyModel, RENDER, depthMap, colorMap);
+        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        glClear(GL_DEPTH_BUFFER_BIT);
 
+        glUniform1f(glGetUniformLocation(stereogram_shader.Program, "final"), 1.0);
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
         // Swapping back and front buffers
         glfwSwapBuffers(window);
     }
@@ -359,7 +377,8 @@ void RenderObjects(Shader &shader, Model &planeModel, Model &cubeModel, Model &s
         glBindTexture(GL_TEXTURE_2D, colorMap);
         textureLocation = glGetUniformLocation(shader.Program, "colorMap");
         glUniform1i(textureLocation, 4);
-        
+
+        glUniform1f(glGetUniformLocation(shader.Program, "final"), 0.0);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
