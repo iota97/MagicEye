@@ -77,7 +77,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void apply_camera_movements();
 
 // in this application, we have isolated the models rendering using a function, which will be called in each rendering step
-void RenderObjects(Shader &shader, Model &planeModel, Model &cubeModel, Model &sphereModel, Model &bunnyModel, GLint render_pass, GLuint depthMap);
+void RenderObjects(Shader &shader, Model &planeModel, Model &cubeModel, Model &sphereModel, Model &bunnyModel, GLint render_pass, GLuint depthMap, GLuint colorMap);
 
 // load image from disk and create an OpenGL texture
 GLint LoadTexture(const char* path);
@@ -250,9 +250,20 @@ int main()
     // we bind the depth map FBO
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
-    // we set that we are not calculating nor saving color data
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
+
+    GLuint colorMap;
+    glGenTextures(1, &colorMap);
+    glBindTexture(GL_TEXTURE_2D, colorMap);
+    // in the texture, we will save only the depth data of the fragments. Thus, we specify that we need to render only depth in the first rendering step
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    // we set to clamp the uv coordinates outside [0,1] to the color of the border
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorMap, 0);
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     ///////////////////////////////////////////////////////////////////
 
@@ -276,10 +287,11 @@ int main()
         illumin_shader.Use();
         glUniformMatrix4fv(glGetUniformLocation(illumin_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(illumin_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniform3fv(glGetUniformLocation(illumin_shader.Program, "lightVector"), 1, glm::value_ptr(lightDir0));
         glViewport(0, 0, width, height);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        RenderObjects(illumin_shader, planeModel, cubeModel, sphereModel, bunnyModel, SHADOWMAP, depthMap);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        RenderObjects(illumin_shader, planeModel, cubeModel, sphereModel, bunnyModel, SHADOWMAP, depthMap, colorMap);
         ///////////////////////////////////////////////////////////////////
 
         // we get the view matrix from the Camera class
@@ -312,20 +324,7 @@ int main()
         glUniformMatrix4fv(glGetUniformLocation(stereogram_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(stereogram_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
 
-        // we determine the position in the Shader Program of the uniform variables
-        GLint lightDirLocation = glGetUniformLocation(stereogram_shader.Program, "lightVector");
-        GLint kdLocation = glGetUniformLocation(stereogram_shader.Program, "Kd");
-        GLint alphaLocation = glGetUniformLocation(stereogram_shader.Program, "alpha");
-        GLint f0Location = glGetUniformLocation(stereogram_shader.Program, "F0");
-    
-        // we assign the value to the uniform variables
-        glUniform3fv(lightDirLocation, 1, glm::value_ptr(lightDir0));
-        glUniform1f(kdLocation, Kd);
-        glUniform1f(alphaLocation, alpha);
-        glUniform1f(f0Location, F0);
-
-        // we render the scene
-        RenderObjects(stereogram_shader, planeModel, cubeModel, sphereModel, bunnyModel, RENDER, depthMap);
+        RenderObjects(stereogram_shader, planeModel, cubeModel, sphereModel, bunnyModel, RENDER, depthMap, colorMap);
 
         // Swapping back and front buffers
         glfwSwapBuffers(window);
@@ -343,18 +342,23 @@ int main()
 
 //////////////////////////////////////////
 // we render the objects. We pass also the current rendering step, and the depth map generated in the first step, which is used by the shaders of the second step
-void RenderObjects(Shader &shader, Model &planeModel, Model &cubeModel, Model &sphereModel, Model &bunnyModel, GLint render_pass, GLuint depthMap)
+void RenderObjects(Shader &shader, Model &planeModel, Model &cubeModel, Model &sphereModel, Model &bunnyModel, GLint render_pass, GLuint depthMap, GLuint colorMap)
 {
     if (render_pass == RENDER) {
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, depthMap);
-        GLint textureLocation = glGetUniformLocation(shader.Program, "shadowMap");
+        GLint textureLocation = glGetUniformLocation(shader.Program, "depthMap");
         glUniform1i(textureLocation, 2);
 
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, textureID[2]);
         textureLocation = glGetUniformLocation(shader.Program, "random");
         glUniform1i(textureLocation, 3);
+
+        glActiveTexture(GL_TEXTURE4);
+        glBindTexture(GL_TEXTURE_2D, colorMap);
+        textureLocation = glGetUniformLocation(shader.Program, "colorMap");
+        glUniform1i(textureLocation, 4);
         
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
