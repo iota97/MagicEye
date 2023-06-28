@@ -12,5 +12,6 @@ struct Context {
     // Settings
     bool showMenu = false;
     bool flyingCamera = true;
+    bool vSync = true;
     float depthStrength = 5.0;
 };

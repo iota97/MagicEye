@@ -8,7 +8,7 @@ IMGUI_HEADER = ./ext/imgui/imconfig.h ./ext/imgui/imgui_internal.h ./ext/imgui/i
 	./ext/imgui/imgui_impl_opengl3.h ./ext/imgui/imgui_impl_glfw.h ./ext/imgui/imgui_impl_opengl3_loader.h
 
 OBJ = main.o image.o glad.o imgui.o imgui_draw.o imgui_tables.o imgui_widgets.o imgui_impl_opengl3.o imgui_impl_glfw.o \
-	StereoPass.o ImGUI.o SceneCamera.o IllumPass.o
+	StereoPass.o ImGUI.o SceneCamera.o IllumPass.o Render.o
 
 magiceye: $(OBJ) 
 	$(CXX) -o $(TARGET) $(OBJ) $(LDFLAGS)
@@ -20,7 +20,10 @@ clean :
 main.o: main.cpp ./src/Context.h
 	$(CXX) $(CXXFLAGS) -c main.cpp
 
-IllumPass.o:  ./src/IllumPass.cpp ./src/IllumPass.h ./src/Context.h
+Render.o: ./src/Render.cpp ./src/Render.h ./src/Context.h
+	$(CXX) $(CXXFLAGS) -c ./src/Render.cpp
+	
+IllumPass.o: ./src/IllumPass.cpp ./src/IllumPass.h ./src/Context.h
 	$(CXX) $(CXXFLAGS) -c ./src/IllumPass.cpp
 
 SceneCamera.o: ./src/SceneCamera.cpp ./src/SceneCamera.h ./src/Context.h

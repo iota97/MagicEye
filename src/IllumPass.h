@@ -1,7 +1,6 @@
 #pragma once
 
 #include "glad/glad.h"
-
 #include <glm/glm.hpp>
 #include "utils/shader.h"
 #include "utils/model.h"
