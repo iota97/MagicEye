@@ -13,9 +13,6 @@ Universita' degli Studi di Milano
 
 #pragma once
 
-using namespace std;
-
-// Std. Includes
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -33,20 +30,20 @@ public:
     Shader(const GLchar* vertexPath, const GLchar* fragmentPath)
     {
         // Step 1: we retrieve shaders source code from provided filepaths
-        string vertexCode;
-        string fragmentCode;
-        ifstream vShaderFile;
-        ifstream fShaderFile;
+        std::string vertexCode;
+        std::string fragmentCode;
+        std::ifstream vShaderFile;
+        std::ifstream fShaderFile;
 
         // ensure ifstream objects can throw exceptions:
-        vShaderFile.exceptions (ifstream::failbit | ifstream::badbit);
-        fShaderFile.exceptions (ifstream::failbit | ifstream::badbit);
+        vShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
+        fShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
         try
         {
             // Open files
             vShaderFile.open(vertexPath);
             fShaderFile.open(fragmentPath);
-            stringstream vShaderStream, fShaderStream;
+            std::stringstream vShaderStream, fShaderStream;
             // Read file's buffer contents into streams
             vShaderStream << vShaderFile.rdbuf();
             fShaderStream << fShaderFile.rdbuf();
@@ -57,9 +54,9 @@ public:
             vertexCode = vShaderStream.str();
             fragmentCode = fShaderStream.str();
         }
-        catch (const ifstream::failure& e)
+        catch (const std::ifstream::failure& e)
         {
-            cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << endl;
+            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
         }
 
         // Convert strings to char pointers
@@ -108,7 +105,7 @@ private:
     //////////////////////////////////////////
 
     // Check compilation and linking errors
-    void checkCompileErrors(GLuint shader, string type)
+    void checkCompileErrors(GLuint shader, std::string type)
 	{
 		GLint success;
 		GLchar infoLog[1024];
@@ -118,7 +115,7 @@ private:
 			if(!success)
 			{
 				glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-                cout << "| ERROR::::SHADER-COMPILATION-ERROR of type: " << type << "|\n" << infoLog << "\n| -- --------------------------------------------------- -- |" << endl;
+                std::cout << "| ERROR::::SHADER-COMPILATION-ERROR of type: " << type << "|\n" << infoLog << "\n| -- --------------------------------------------------- -- |" << std::endl;
 			}
 		}
 		else
@@ -127,7 +124,7 @@ private:
 			if(!success)
 			{
 				glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-                cout << "| ERROR::::PROGRAM-LINKING-ERROR of type: " << type << "|\n" << infoLog << "\n| -- --------------------------------------------------- -- |" << endl;
+                std::cout << "| ERROR::::PROGRAM-LINKING-ERROR of type: " << type << "|\n" << infoLog << "\n| -- --------------------------------------------------- -- |" << std::endl;
 			}
 		}
 	}

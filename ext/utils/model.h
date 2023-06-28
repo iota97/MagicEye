@@ -21,7 +21,6 @@ Universita' degli Studi di Milano
 
 
 #pragma once
-using namespace std;
 
 // we use GLM data structures to convert data in the Assimp data structures in a data structures suited for VBO, VAO and EBO buffers
 #include <glm/glm.hpp>
@@ -39,7 +38,7 @@ class Model
 {
 public:
     // at the end of loading, we will have a vector of Mesh class instances
-    vector<Mesh> meshes;
+    std::vector<Mesh> meshes;
 
     //////////////////////////////////////////
 
@@ -68,7 +67,7 @@ public:
     // to notice that Model class is not strictly following the Rules of 5
     // https://en.cppreference.com/w/cpp/language/rule_of_three
     // because we are not writing a user-defined destructor.
-    Model(const string& path)
+    Model(const std::string& path)
     {
         this->loadModel(path);
     }
@@ -89,7 +88,7 @@ private:
 
     //////////////////////////////////////////
     // loading of the model using Assimp library. Nodes are processed to build a vector of Mesh class instances
-    void loadModel(string path)
+    void loadModel(std::string path)
     {
         // loading using Assimp
         // N.B.: it is possible to set, if needed, some operations to be performed by Assimp after the loading.
@@ -102,7 +101,7 @@ private:
         // check for errors (see comment above)
         if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
         {
-            cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
+            std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
             return;
         }
 
@@ -143,8 +142,8 @@ private:
     Mesh processMesh(aiMesh* mesh)
     {
         // data structures for vertices and indices of vertices (for faces)
-        vector<Vertex> vertices;
-        vector<GLuint> indices;
+        std::vector<Vertex> vertices;
+        std::vector<GLuint> indices;
 
         for(GLuint i = 0; i < mesh->mNumVertices; i++)
         {
@@ -186,7 +185,7 @@ private:
             }
             else{
                 vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-                cout << "WARNING::ASSIMP:: MODEL WITHOUT UV COORDINATES -> TANGENT AND BITANGENT ARE = 0" << endl;
+                std::cout << "WARNING::ASSIMP:: MODEL WITHOUT UV COORDINATES -> TANGENT AND BITANGENT ARE = 0" << std::endl;
             }
             // we add the vertex to the list
             vertices.emplace_back(vertex);

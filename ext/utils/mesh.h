@@ -26,8 +26,6 @@ Universita' degli Studi di Milano
 
 #pragma once
 
-using namespace std;
-
 // Std. Includes
 #include <vector>
 
@@ -49,8 +47,8 @@ struct Vertex {
 class Mesh {
 public:
     // data structures for vertices, and indices of vertices (for faces)
-    vector<Vertex> vertices;
-    vector<GLuint> indices;
+    std::vector<Vertex> vertices;
+    std::vector<GLuint> indices;
     // VAO
     GLuint VAO;
 
@@ -67,7 +65,7 @@ public:
     // Constructor
     // We use initializer list and std::move in order to avoid a copy of the arguments
     // This constructor empties the source vectors (vertices and indices)
-    Mesh(vector<Vertex>& vertices, vector<GLuint>& indices) noexcept
+    Mesh(std::vector<Vertex>& vertices, std::vector<GLuint>& indices) noexcept
         : vertices(std::move(vertices)), indices(std::move(indices))
     {
         this->setupMesh();
