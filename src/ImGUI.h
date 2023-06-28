@@ -4,7 +4,7 @@
 
 class ImGUI {
 public:
-    ImGUI(GLFWwindow *window, Context *c);
+    ImGUI(GLFWwindow *w, Context *c);
     ~ImGUI();
 
     void RenderMenu();

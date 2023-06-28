@@ -4,13 +4,14 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
-ImGUI::ImGUI(GLFWwindow *window, Context *c) : ctx(c) {
+ImGUI::ImGUI(GLFWwindow *w, Context *c) : ctx(c) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
     ImGui::StyleColorsDark();
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplGlfw_InitForOpenGL(w, true);
     ImGui_ImplOpenGL3_Init("#version 430");
 }
 
@@ -24,11 +25,31 @@ void ImGUI::RenderMenu() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    
     ImGui::Begin("Settings");
-    ImGui::Text("FPS: %.1f", ctx->FPS);
+    ImGuiIO& io = ImGui::GetIO();
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+    ImGui::SameLine();
+    ImGui::Dummy(ImVec2(10.0f, 0.0f));
+    ImGui::SameLine();
+    if (ImGui::Button("Quit")) {
+        ctx->shouldClose = true;
+    }
+    ImGui::Dummy(ImVec2(0.0f, 10.0f));
+    ImGui::Checkbox("VSync", &ctx->vSync);
+    ImGui::SameLine();
+    ImGui::Checkbox("Stereogram Rendering", &ctx->stereoRendering);
+
+    ImGui::Dummy(ImVec2(0.0f, 10.0f));
     ImGui::SliderFloat("Depth strength", &ctx->depthStrength, 0.5f, 20.0f, "%.1f");
-        
+    ImGui::SliderFloat("Eye separation", &ctx->eyeSep, 0.1f, 2.0f, "%.1f");
+    ImGui::SliderFloat("Observer distance", &ctx->obsDistance, 0.1f, 5.0f, "%.1f");
+
+    ImGui::Dummy(ImVec2(0.0f, 10.0f));
+    ImGui::SliderFloat("Scene color strength", &ctx->sceneColorStr, 0.0f, 1.0f, "%.1f");
+    ImGui::SliderFloat("Edge strength", &ctx->edgeStr, 0.0f, 2.0f, "%.1f");
     ImGui::End();
+
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

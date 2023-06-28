@@ -6,7 +6,7 @@ void framebuffer_size_callback(GLFWwindow* window, int w, int h) {
     context->height = h;
 }
 
-Render::Render(GLFWwindow *w, Context *c) : ctx(c), window(w), deltas(64), illumPass(ctx), stereoPass(ctx), imGUI(window, ctx) {
+Render::Render(GLFWwindow *w, Context *c) : ctx(c), window(w), illumPass(ctx), stereoPass(ctx), imGUI(window, ctx) {
     context = ctx;
     // Size and resize support
     glfwGetFramebufferSize(window, &ctx->width, &ctx->height);
@@ -41,14 +41,6 @@ void Render::Process(SceneCamera *scene) {
     ctx->deltaTime = ctx->currentFrame - lastFrame;
     lastFrame = ctx->currentFrame;
 
-    // Avg FPS
-    deltas[deltaIndex = (deltaIndex+1) % 64] = ctx->deltaTime;
-    float acc = 0.0;
-    for (int i = 0; i < 64; i++) {
-        acc += deltas[i];
-    }
-    ctx->FPS = 64/acc;
-
     // Resize if needed
     if (oldH != ctx->height || oldW != ctx->width) {
         glBindTexture(GL_TEXTURE_2D, depthMap);
@@ -67,13 +59,15 @@ void Render::Process(SceneCamera *scene) {
 
     // Illumination pass
     glViewport(0, 0, ctx->width, ctx->height);
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, ctx->stereoRendering ? FBO : 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     illumPass.execute(projection, view, lightDir0);
 
     // Stereogram pass
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    stereoPass.execute(colorMap, depthMap);
+    if (ctx->stereoRendering) {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        stereoPass.execute(colorMap, depthMap);
+    }
 
     // UI
     if (ctx->showMenu) {

@@ -39,9 +39,9 @@ int main() {
         return -1;
     }
 
-    // All fine, let's start
-    Render render(window, &ctx);
+    // Scene first, will break ImGUI callbacks otherwise
     SceneCamera sceneCamera(glm::vec3(0.0f, 0.0f, 7.0f), window, &ctx);
+    Render render(window, &ctx);
 
     while (!glfwWindowShouldClose(window)) {
         sceneCamera.Process();

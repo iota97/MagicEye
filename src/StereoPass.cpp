@@ -62,10 +62,14 @@ void StereoPass::execute(GLuint colorMap, GLuint depthMap) {
     }
 
     // Pass uniform
-    glUniform1f(glGetUniformLocation(shader.Program, "time"), ctx->currentFrame);
-    glUniform1f(glGetUniformLocation(shader.Program, "depthStrength"), ctx->depthStrength);
     glUniform1i(glGetUniformLocation(shader.Program, "bufferWidth"), ctx->width);
     glUniform1i(glGetUniformLocation(shader.Program, "bufferHeight"), ctx->height);
+    glUniform1f(glGetUniformLocation(shader.Program, "time"), ctx->currentFrame);
+    glUniform1f(glGetUniformLocation(shader.Program, "depthStrength"), ctx->depthStrength);
+    glUniform1f(glGetUniformLocation(shader.Program, "eyeSep"), ctx->eyeSep);
+    glUniform1f(glGetUniformLocation(shader.Program, "obsDistance"), ctx->obsDistance);
+    glUniform1f(glGetUniformLocation(shader.Program, "sceneColorStr"), ctx->sceneColorStr);
+    glUniform1f(glGetUniformLocation(shader.Program, "edgeStr"), ctx->edgeStr);
 
     // Clear color SSBO
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, colorSSBO); 

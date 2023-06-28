@@ -10,7 +10,10 @@ uniform sampler2D uvMap;
 uniform int bufferWidth;
 uniform int bufferHeight;
 uniform float time;
-
+uniform float eyeSep;
+uniform float obsDistance;
+uniform float edgeStr;
+uniform float sceneColorStr;
 uniform float depthStrength;
 
 layout (std430, binding = 0) coherent buffer Color {
@@ -56,7 +59,7 @@ subroutine (stereoPass) vec4 firstPass() {
     vec2 currCoord = uv;
     for(int i = 0; i < 32; i++) {
         float depth = sampleDepth(currCoord);
-        float sep = 0.5*depth/(depth + 1.8);
+        float sep = eyeSep*depth/(depth + obsDistance);
         if(currCoord.x < 0.0)
            break;
         currCoord.x -= sep;
@@ -65,13 +68,13 @@ subroutine (stereoPass) vec4 firstPass() {
     UV[index(uv)] = currCoord;
 
     vec3 random = vec3(rand(uv*time));
-    vec3 col = mix(texture(colorMap, uv).rgb, random, 0.7);
+    vec3 col = mix(texture(colorMap, uv).rgb, random, 1.0-sceneColorStr);
 
     int i = index(currCoord);
     atomicAdd(color[i].r, int(col.r*255));
     atomicAdd(color[i].g, int(col.g*255));
     atomicAdd(color[i].b, int(col.b*255));
-    atomicAdd(color[i].a, checkEdge(uv) ? 255 : 1);
+    atomicAdd(color[i].a, checkEdge(uv) ? int(edgeStr*8) + 1: 1);
 
     return vec4(0.0);
 } 

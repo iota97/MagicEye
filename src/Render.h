@@ -17,13 +17,10 @@ public:
 private:
     Context *ctx;
     GLFWwindow *window;
+    GLfloat lastFrame = 0;
 
     int oldH = -1, oldW = -1;
     GLuint FBO, depthMap, colorMap;
-
-    GLfloat lastFrame = 0;
-    std::vector<float> deltas;
-    int deltaIndex = 0;
 
     IllumPass illumPass;
     StereoPass stereoPass;

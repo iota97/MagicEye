@@ -63,6 +63,10 @@ glm::mat4 SceneCamera::GetViewMatrix() {
 }
 
 void SceneCamera::Process() {
+    if (context->shouldClose) {
+        glfwSetWindowShouldClose(window, true);
+        return;
+    }
     camera.onGround = !context->flyingCamera;
     glfwPollEvents();
     if (!context->showMenu) {
