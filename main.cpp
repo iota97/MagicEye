@@ -1,66 +1,20 @@
-/*
-work06a
-
-author: Davide Gadia
-
-Real-Time Graphics Programming - a.a. 2022/2023
-Master degree in Computer Science
-Universita' degli Studi di Milano
-*/
-
-/*
-OpenGL coordinate system (right-handed)
-positive X axis points right
-positive Y axis points up
-positive Z axis points "outside" the screen
-
-
-                              Y
-                              |
-                              |
-                              |________X
-                             /
-                            /
-                           /
-                          Z
-*/
-
-
-// Std. Includes
 #include <string>
 
-// Loader for OpenGL extensions
-// http://glad.dav1d.de/
-// THIS IS OPTIONAL AND NOT REQUIRED, ONLY USE THIS IF YOU DON'T WANT GLAD TO INCLUDE windows.h
-// GLAD will include windows.h for APIENTRY if it was not previously defined.
-// Make sure you have the correct definition for APIENTRY for platforms which define _WIN32 but don't use __stdcall
-#ifdef _WIN32
-    #define APIENTRY __stdcall
-#endif
-
 #include "glad/glad.h"
-
-// GLFW library to create window and to manage I/O
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
 #include <GLFW/glfw3.h>
 
-// another check related to OpenGL loader
-// confirm that GLAD didn't include windows.h
-#ifdef _WINDOWS_
-    #error windows.h was included!
-#endif
-
-// classes developed during lab lectures to manage shaders, to load models, and for FPS camera
 #include <utils/shader.h>
 #include <utils/model.h>
 #include <utils/camera.h>
 
-// we load the GLM classes used in the application
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// we include the library for images loading
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image/stb_image.h"
 
@@ -73,6 +27,7 @@ enum render_passes{ SHADOWMAP, RENDER};
 // callback functions for keyboard and mouse events
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void framebuffer_size_callback(GLFWwindow* window, int w, int h);
 // if one of the WASD keys is pressed, we call the corresponding method of the Camera class
 void apply_camera_movements();
 
@@ -137,37 +92,33 @@ vector<GLint> textureID;
 GLfloat repeat = 1.0;
 GLuint VBO, VAO, EBO;
 
+bool showMenu = false;
+
+float depthStrength = 5;
+int width, height;
 /////////////////// MAIN function ///////////////////////
-int main()
-{
-    // Initialization of OpenGL context using GLFW
+int main() {
     glfwInit();
-    // We set OpenGL specifications required for this application
-    // In this case: 4.1 Core
-    // If not supported by your graphics HW, the context will not be created and the application will close
-    // N.B.) creating GLAD code to load extensions, try to take into account the specifications and any extensions you want to use,
-    // in relation also to the values indicated in these GLFW commands
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    // we set if the window is resizable
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
-    // we create the application's window
     GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "MagicEye", nullptr, nullptr);
-    if (!window)
-    {
+    if (!window) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
     }
+
     glfwMakeContextCurrent(window);
     //glfwSwapInterval(0);
 
     // we put in relation the window and the callbacks
     glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     // we disable the mouse cursor
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -180,7 +131,6 @@ int main()
     }
 
     // we define the viewport dimensions
-    int width, height;
     glfwGetFramebufferSize(window, &width, &height);
 
     // we enable Z test
@@ -259,7 +209,7 @@ int main()
     ///////////////////////////////////////////////////////////////////
 
     // Projection matrix of the camera: FOV angle, aspect ratio, near and far planes
-    glm::mat4 projection = glm::perspective(45.0f, (float)screenWidth/(float)screenHeight, 0.1f, 50.0f);
+    glm::mat4 projection = glm::perspective(45.0f, (float)width/(float)height, 0.1f, 50.0f);
 
     GLuint colorSSBO, uvSSBO;
     glGenBuffers(1, &colorSSBO);
@@ -275,23 +225,51 @@ int main()
 
     auto deltas = std::vector<float>(256);
     int deltaIndex = 0;
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 430");
+
+    float oldW = width;
+    float oldH = height;
     // Rendering loop: this code is executed at each frame
-    while(!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window)) {
         // we determine the time passed from the beginning
         // and we calculate time difference between current frame rendering and the previous one
         GLfloat currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
         deltas[deltaIndex = (deltaIndex+1) % 256] = deltaTime;
         float acc = 0.0;
         for (int i = 0; i < 256; i++) {
             acc += deltas[i];
         }
-        //printf("FPS: %f\n", 256/acc);
+        float FPS = 256/acc;
 
-        // Check is an I/O event is happening
+        if (oldH != height || oldW != width) {
+            projection = glm::perspective(45.0f, (float)width/(float)height, 0.1f, 50.0f);
+
+            glBindTexture(GL_TEXTURE_2D, depthMap);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+            glBindTexture(GL_TEXTURE_2D, colorMap);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+            glBindTexture(GL_TEXTURE_2D, 0);
+
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, colorSSBO); 
+            glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::ivec4) * width * height, nullptr, GL_DYNAMIC_COPY);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, uvSSBO);
+            glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::vec2) * width * height, nullptr, GL_DYNAMIC_COPY);
+            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+            oldH = height;
+            oldW = width;
+        }
+
         glfwPollEvents();
-        // we apply FPS camera movements
         apply_camera_movements();
 
         view = camera.GetViewMatrix();
@@ -303,13 +281,16 @@ int main()
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         RenderObjects(illumin_shader, planeModel, cubeModel, sphereModel, bunnyModel, SHADOWMAP, depthMap, colorMap);
-        ///////////////////////////////////////////////////////////////////
 
         stereogram_shader.Use();
-        GLuint index = glGetSubroutineIndex(stereogram_shader.Program, GL_FRAGMENT_SHADER, "firstPass");
-        glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &index);
 
         glUniform1f(glGetUniformLocation(stereogram_shader.Program, "time"), currentFrame);
+        glUniform1fv(glGetUniformLocation(stereogram_shader.Program, "depthStrength"), 1, &depthStrength);
+        glUniform1i(glGetUniformLocation(stereogram_shader.Program, "bufferWidth"), width);
+        glUniform1i(glGetUniformLocation(stereogram_shader.Program, "bufferHeight"), height);
+
+        GLuint index = glGetSubroutineIndex(stereogram_shader.Program, GL_FRAGMENT_SHADER, "firstPass");
+        glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &index);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glDisable(GL_DEPTH_TEST);
@@ -331,26 +312,40 @@ int main()
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
 
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
         index = glGetSubroutineIndex(stereogram_shader.Program, GL_FRAGMENT_SHADER, "secondPass");
         glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &index);
 
-        glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
         glEnable(GL_DEPTH_TEST);
 
+        if (showMenu) {
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            ImGui::Begin("Settings");
+            ImGui::Text("FPS: %.1f", FPS);
+            ImGui::SliderFloat("Depth strength", &depthStrength, 0.5f, 20.0f, "%.1f");
+            
+            ImGui::End();
+
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        }
+
         glfwSwapBuffers(window);
     }
 
-    // when I exit from the graphics loop, it is because the application is closing
-    // we delete the Shader Programs
     stereogram_shader.Delete();
     illumin_shader.Delete();
 
-    // chiudo e cancello il contesto creato
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
     glfwTerminate();
     return 0;
 }
@@ -475,76 +470,51 @@ GLint LoadTexture(const char* path)
     return textureImage;
 }
 
-//////////////////////////////////////////
-// If one of the WASD keys is pressed, the camera is moved accordingly (the code is in utils/camera.h)
-void apply_camera_movements()
-{
-    // if a single WASD key is pressed, then we will apply the full value of velocity v in the corresponding direction.
-    // However, if two keys are pressed together in order to move diagonally (W+D, W+A, S+D, S+A), 
-    // then the camera will apply a compensation factor to the velocities applied in the single directions, 
-    // in order to have the full v applied in the diagonal direction  
-    // the XOR on A and D is to avoid the application of a wrong attenuation in the case W+A+D or S+A+D are pressed together.  
+void apply_camera_movements() {
     GLboolean diagonal_movement = (keys[GLFW_KEY_W] ^ keys[GLFW_KEY_S]) && (keys[GLFW_KEY_A] ^ keys[GLFW_KEY_D]); 
     camera.SetMovementCompensation(diagonal_movement);
     
-    if(keys[GLFW_KEY_W])
+    if (keys[GLFW_KEY_W])
         camera.ProcessKeyboard(FORWARD, deltaTime);
-    if(keys[GLFW_KEY_S])
+    if (keys[GLFW_KEY_S])
         camera.ProcessKeyboard(BACKWARD, deltaTime);
-    if(keys[GLFW_KEY_A])
+    if (keys[GLFW_KEY_A])
         camera.ProcessKeyboard(LEFT, deltaTime);
-    if(keys[GLFW_KEY_D])
+    if (keys[GLFW_KEY_D])
         camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
-//////////////////////////////////////////
-// callback for keyboard events
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
-{
-    // if ESC is pressed, we close the application
-    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GL_TRUE);
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+        showMenu = !showMenu;
+        glfwSetInputMode(window, GLFW_CURSOR, showMenu ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+    }
 
-    // if P is pressed, we start/stop the animated rotation of models
-    if(key == GLFW_KEY_P && action == GLFW_PRESS)
-        spinning=!spinning;
-
-    // if L is pressed, we activate/deactivate wireframe rendering of models
-    if(key == GLFW_KEY_L && action == GLFW_PRESS)
-        wireframe=!wireframe;
-
-    // we keep trace of the pressed keys
-    // with this method, we can manage 2 keys pressed at the same time:
-    // many I/O managers often consider only 1 key pressed at the time (the first pressed, until it is released)
-    // using a boolean array, we can then check and manage all the keys pressed at the same time
-    if(action == GLFW_PRESS)
+    if (action == GLFW_PRESS) {
         keys[key] = true;
-    else if(action == GLFW_RELEASE)
+    } else if(action == GLFW_RELEASE) {
         keys[key] = false;
+    }
 }
 
-//////////////////////////////////////////
-// callback for mouse events
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-      // we move the camera view following the mouse cursor
-      // we calculate the offset of the mouse cursor from the position in the last frame
-      // when rendering the first frame, we do not have a "previous state" for the mouse, so we set the previous state equal to the initial values (thus, the offset will be = 0)
-      if(firstMouse)
-      {
-          lastX = xpos;
-          lastY = ypos;
-          firstMouse = false;
-      }
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    if (firstMouse) {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
 
-      // offset of mouse cursor position
-      GLfloat xoffset = xpos - lastX;
-      GLfloat yoffset = lastY - ypos;
+    GLfloat xoffset = xpos - lastX;
+    GLfloat yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
 
-      // the new position will be the previous one for the next frame
-      lastX = xpos;
-      lastY = ypos;
+    if (!showMenu) {
+        camera.ProcessMouseMovement(xoffset, yoffset);
+    }
+}
 
-      // we pass the offset to the Camera class instance in order to update the rendering
-      camera.ProcessMouseMovement(xoffset, yoffset);
+void framebuffer_size_callback(GLFWwindow* window, int w, int h) {
+    width = w;
+    height = h;
 }

@@ -7,7 +7,11 @@ uniform sampler2D depthMap;
 uniform sampler2D colorMap;
 uniform sampler2D uvMap;
 
+uniform int bufferWidth;
+uniform int bufferHeight;
 uniform float time;
+
+uniform float depthStrength;
 
 layout (std430, binding = 0) coherent buffer Color {
   ivec4 color[];
@@ -21,10 +25,10 @@ subroutine vec4 stereoPass();
 subroutine uniform stereoPass computePass;
 
 int index(vec2 co) {
-    int width = 1280-1;
-    int height = 720-1;
+    int width = bufferWidth-1;
+    int height = bufferHeight-1;
     int res = int((co.y*height+co.x)*width);
-    return (res >= 0 && res < 1280*720) ? res : 0;
+    return (res >= 0 && res < bufferWidth*bufferHeight) ? res : 0;
 }
 
 float rand(vec2 co) {
@@ -32,7 +36,7 @@ float rand(vec2 co) {
 }
  
 float sampleDepth(vec2 uv) {
-    return pow(texture(depthMap, uv).r, 5.0);
+    return pow(texture(depthMap, uv).r, depthStrength);
 }
 
 bool checkEdge(vec2 co) {
