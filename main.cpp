@@ -163,6 +163,7 @@ int main()
         return -1;
     }
     glfwMakeContextCurrent(window);
+    //glfwSwapInterval(0);
 
     // we put in relation the window and the callbacks
     glfwSetKeyCallback(window, key_callback);
@@ -249,8 +250,9 @@ int main()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorMap, 0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -271,14 +273,21 @@ int main()
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, uvSSBO);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
+    auto deltas = std::vector<float>(256);
+    int deltaIndex = 0;
     // Rendering loop: this code is executed at each frame
-    while(!glfwWindowShouldClose(window))
-    {
+    while(!glfwWindowShouldClose(window)) {
         // we determine the time passed from the beginning
         // and we calculate time difference between current frame rendering and the previous one
         GLfloat currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+        deltas[deltaIndex = (deltaIndex+1) % 256] = deltaTime;
+        float acc = 0.0;
+        for (int i = 0; i < 256; i++) {
+            acc += deltas[i];
+        }
+        //printf("FPS: %f\n", 256/acc);
 
         // Check is an I/O event is happening
         glfwPollEvents();
@@ -300,6 +309,8 @@ int main()
         GLuint index = glGetSubroutineIndex(stereogram_shader.Program, GL_FRAGMENT_SHADER, "firstPass");
         glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &index);
 
+        glUniform1f(glGetUniformLocation(stereogram_shader.Program, "time"), currentFrame);
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glDisable(GL_DEPTH_TEST);
 
@@ -317,11 +328,6 @@ int main()
         glBindTexture(GL_TEXTURE_2D, colorMap);
         textureLocation = glGetUniformLocation(stereogram_shader.Program, "colorMap");
         glUniform1i(textureLocation, 1);
-
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, textureID[2]);
-        textureLocation = glGetUniformLocation(stereogram_shader.Program, "random");
-        glUniform1i(textureLocation, 2);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
