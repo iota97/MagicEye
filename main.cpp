@@ -38,10 +38,10 @@ positive Z axis points "outside" the screen
     #define APIENTRY __stdcall
 #endif
 
-#include <glad/glad.h>
+#include "glad/glad.h"
 
 // GLFW library to create window and to manage I/O
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 
 // another check related to OpenGL loader
 // confirm that GLAD didn't include windows.h
@@ -62,7 +62,7 @@ positive Z axis points "outside" the screen
 
 // we include the library for images loading
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image/stb_image.h>
+#include "stb_image/stb_image.h"
 
 // dimensions of application's window
 GLuint screenWidth = 1280, screenHeight = 720;

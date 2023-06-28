@@ -1,13 +1,18 @@
 CXX = c++
 CXXFLAGS  = -g -O2 -x c++ -Wall -Wno-invalid-offsetof -std=c++11 -I./include
-LDFLAGS = -L/usr/lib -lassimp   -lglfw -lz -lminizip
-SOURCES = ./include/glad/glad.c main.cpp
+LDFLAGS = -L/usr/lib -lassimp -lglfw -lz -lminizip
+SOURCES = main.cpp
 TARGET = magiceye
 
-.PHONY : all
-all:
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(SOURCES) -o $(TARGET)
+build: glad.o main.o
+	$(CXX) -o $(TARGET) glad.o main.o $(LDFLAGS)
 
 .PHONY : clean
 clean :
-	-rm $(TARGET)
+	-rm glad.o $(TARGET)
+
+main.o:
+	$(CXX) $(CXXFLAGS) -c main.cpp
+
+glad.o:
+	$(CXX) $(CXXFLAGS) -c ./include/glad/glad.c
