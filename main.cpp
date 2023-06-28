@@ -6,8 +6,6 @@
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <string>
-
 #include "utils/shader.h"
 #include "utils/model.h"
 #include "utils/camera.h"
@@ -16,6 +14,7 @@
 #include "src/StereoPass.h"
 #include "src/ImGUI.h"
 #include "src/Context.h"
+#include "src/SceneCamera.h"
 
 // dimensions of application's window
 GLuint screenWidth = 1280, screenHeight = 720;
@@ -23,27 +22,10 @@ GLuint screenWidth = 1280, screenHeight = 720;
 // the rendering steps used in the application
 enum render_passes{ SHADOWMAP, RENDER };
 
-// callback functions for keyboard and mouse events
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void framebuffer_size_callback(GLFWwindow* window, int w, int h);
-// if one of the WASD keys is pressed, we call the corresponding method of the Camera class
-void apply_camera_movements();
 
 // in this application, we have isolated the models rendering using a function, which will be called in each rendering step
 void RenderObjects(Shader &shader, Model &planeModel, Model &cubeModel, Model &sphereModel, Model &bunnyModel, GLint render_pass, GLuint depthMap, GLuint colorMap);
-
-// we initialize an array of booleans for each keyboard key
-bool keys[1024];
-
-// we need to store the previous mouse position to calculate the offset with the current frame
-GLfloat lastX, lastY;
-// when rendering the first frame, we do not have a "previous state" for the mouse, so we need to manage this situation
-bool firstMouse = true;
-
-// parameters for time calculation (for animations)
-GLfloat deltaTime = 0.0f;
-GLfloat lastFrame = 0.0f;
 
 // View matrix: the camera moves, so we just set to indentity now
 glm::mat4 view = glm::mat4(1.0f);
@@ -59,17 +41,12 @@ glm::mat4 planeModelMatrix = glm::mat4(1.0f);
 glm::mat3 planeNormalMatrix = glm::mat3(1.0f);
 
 // we create a camera. We pass the initial position as a paramenter to the constructor. The last boolean tells if we want a camera "anchored" to the ground
-Camera camera(glm::vec3(0.0f, 0.0f, 7.0f), GL_FALSE);
 glm::vec3 lightDir0 = glm::vec3(1.0f, 1.0f, 1.0f);
-
-
 std::vector<GLint> textureID;
 
-bool showMenu = false;
 static Context ctx;
 
 int main() {
-
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -87,27 +64,16 @@ int main() {
     glfwMakeContextCurrent(window);
     //glfwSwapInterval(0);
 
-    // we put in relation the window and the callbacks
-    glfwSetKeyCallback(window, key_callback);
-    glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    // we disable the mouse cursor
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-    // GLAD tries to load the context set by GLFW
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         std::cout << "Failed to initialize OpenGL context" << std::endl;
         return -1;
     }
 
-    // we define the viewport dimensions
     glfwGetFramebufferSize(window, &ctx.width, &ctx.height);
 
-    // we enable Z test
     glEnable(GL_DEPTH_TEST);
-
-    //the "clear" color for the frame buffer
     glClearColor(0.26f, 0.46f, 0.98f, 1.0f);
 
     // we create the Shader Program used for objects
@@ -164,16 +130,18 @@ int main() {
 
     StereoPass stereoPass(&ctx);
     ImGUI imGUI(window, &ctx);
+    SceneCamera sceneCamera(glm::vec3(0.0f, 0.0f, 7.0f), window, &ctx);
 
+    GLfloat lastFrame = 0;
     // Rendering loop: this code is executed at each frame
     while (!glfwWindowShouldClose(window)) {
         // we determine the time passed from the beginning
         // and we calculate time difference between current frame rendering and the previous one
         ctx.currentFrame = glfwGetTime();
-        deltaTime = ctx.currentFrame - lastFrame;
+        ctx.deltaTime = ctx.currentFrame - lastFrame;
         lastFrame = ctx.currentFrame;
 
-        deltas[deltaIndex = (deltaIndex+1) % 256] = deltaTime;
+        deltas[deltaIndex = (deltaIndex+1) % 256] = ctx.deltaTime;
         float acc = 0.0;
         for (int i = 0; i < 256; i++) {
             acc += deltas[i];
@@ -192,10 +160,9 @@ int main() {
             oldW = ctx.width;
         }
 
-        glfwPollEvents();
-        apply_camera_movements();
+        sceneCamera.Process();
 
-        view = camera.GetViewMatrix();
+        view = sceneCamera.GetViewMatrix();
         illumin_shader.Use();
         glUniformMatrix4fv(glGetUniformLocation(illumin_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(illumin_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
@@ -208,7 +175,7 @@ int main() {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         stereoPass.execute(colorMap, depthMap);
 
-        if (showMenu) {
+        if (ctx.showMenu) {
             imGUI.RenderMenu();
         }
 
@@ -303,50 +270,6 @@ void RenderObjects(Shader &shader, Model &planeModel, Model &cubeModel, Model &s
 
     // we render the bunny
     bunnyModel.Draw();
-}
-
-void apply_camera_movements() {
-    GLboolean diagonal_movement = (keys[GLFW_KEY_W] ^ keys[GLFW_KEY_S]) && (keys[GLFW_KEY_A] ^ keys[GLFW_KEY_D]); 
-    camera.SetMovementCompensation(diagonal_movement);
-    
-    if (keys[GLFW_KEY_W])
-        camera.ProcessKeyboard(FORWARD, deltaTime);
-    if (keys[GLFW_KEY_S])
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
-    if (keys[GLFW_KEY_A])
-        camera.ProcessKeyboard(LEFT, deltaTime);
-    if (keys[GLFW_KEY_D])
-        camera.ProcessKeyboard(RIGHT, deltaTime);
-}
-
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-        showMenu = !showMenu;
-        glfwSetInputMode(window, GLFW_CURSOR, showMenu ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
-    }
-
-    if (action == GLFW_PRESS) {
-        keys[key] = true;
-    } else if(action == GLFW_RELEASE) {
-        keys[key] = false;
-    }
-}
-
-void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-    if (firstMouse) {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
-    }
-
-    GLfloat xoffset = xpos - lastX;
-    GLfloat yoffset = lastY - ypos;
-    lastX = xpos;
-    lastY = ypos;
-
-    if (!showMenu) {
-        camera.ProcessMouseMovement(xoffset, yoffset);
-    }
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int w, int h) {

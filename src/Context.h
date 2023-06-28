@@ -7,7 +7,10 @@ struct Context {
     // Timing
     float currentFrame;
     float FPS;
+    float deltaTime;
 
     // Settings
+    bool showMenu = false;
+    bool flyingCamera = true;
     float depthStrength = 5.0;
 };
