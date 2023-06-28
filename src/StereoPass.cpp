@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-StereoPass::StereoPass(Context *c) : shader(Shader("assets/shaders/stereogram.vert", "assets/shaders/stereogram.frag")), ctx(c) {
+StereoPass::StereoPass(Context *c) : shader("assets/shaders/stereogram.vert", "assets/shaders/stereogram.frag"), ctx(c) {
     // Create fullscreen quad
     GLfloat vertices[] = {
     1.0f,  1.0f, 0.0f,
