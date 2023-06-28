@@ -16,6 +16,8 @@
 #include "utils/camera.h"
 #include "utils/image.h"
 
+#include "src/StereoPass.h"
+
 // dimensions of application's window
 GLuint screenWidth = 1280, screenHeight = 720;
 
@@ -85,8 +87,6 @@ std::vector<GLint> textureID;
 
 // UV repetitions
 GLfloat repeat = 1.0;
-GLuint VBO, VAO, EBO;
-
 bool showMenu = false;
 
 float depthStrength = 5;
@@ -135,7 +135,6 @@ int main() {
     glClearColor(0.26f, 0.46f, 0.98f, 1.0f);
 
     // we create the Shader Program used for objects
-    Shader stereogram_shader = Shader("assets/shaders/stereogram.vert", "assets/shaders/stereogram.frag");
     Shader illumin_shader = Shader("assets/shaders/illumin.vert", "assets/shaders/illumin.frag");
 
     // we load the images and store them in a vector
@@ -148,31 +147,6 @@ int main() {
     Model sphereModel("assets/models/sphere.obj");
     Model bunnyModel("assets/models/bunny_lp.obj");
     Model planeModel("assets/models/plane.obj");
-
-    GLfloat vertices[] = {
-        1.0f,  1.0f, 0.0f,
-        1.0f, -1.0f, 0.0f,
-        -1.0f, -1.0f, 0.0f,
-        -1.0f,  1.0f, 0.0f
-    };
-    GLuint indices[] = {
-        0, 1, 3,
-        1, 2, 3
-    };
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
 
     GLuint depthMapFBO, depthMap, colorMap;
     glGenFramebuffers(1, &depthMapFBO);
@@ -206,18 +180,6 @@ int main() {
     // Projection matrix of the camera: FOV angle, aspect ratio, near and far planes
     glm::mat4 projection = glm::perspective(45.0f, (float)width/(float)height, 0.1f, 50.0f);
 
-    GLuint colorSSBO, uvSSBO;
-    glGenBuffers(1, &colorSSBO);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, colorSSBO); 
-    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::ivec4) * width * height, nullptr, GL_DYNAMIC_COPY);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, colorSSBO);
-
-    glGenBuffers(1, &uvSSBO);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, uvSSBO);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::vec2) * width * height, nullptr, GL_DYNAMIC_COPY);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, uvSSBO);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
     auto deltas = std::vector<float>(256);
     int deltaIndex = 0;
 
@@ -231,6 +193,8 @@ int main() {
 
     float oldW = width;
     float oldH = height;
+
+    StereoPass stereoPass;
     // Rendering loop: this code is executed at each frame
     while (!glfwWindowShouldClose(window)) {
         // we determine the time passed from the beginning
@@ -254,12 +218,6 @@ int main() {
             glBindTexture(GL_TEXTURE_2D, colorMap);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
             glBindTexture(GL_TEXTURE_2D, 0);
-
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, colorSSBO); 
-            glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::ivec4) * width * height, nullptr, GL_DYNAMIC_COPY);
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, uvSSBO);
-            glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::vec2) * width * height, nullptr, GL_DYNAMIC_COPY);
-            glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
             oldH = height;
             oldW = width;
         }
@@ -277,44 +235,8 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         RenderObjects(illumin_shader, planeModel, cubeModel, sphereModel, bunnyModel, SHADOWMAP, depthMap, colorMap);
 
-        stereogram_shader.Use();
-
-        glUniform1f(glGetUniformLocation(stereogram_shader.Program, "time"), currentFrame);
-        glUniform1fv(glGetUniformLocation(stereogram_shader.Program, "depthStrength"), 1, &depthStrength);
-        glUniform1i(glGetUniformLocation(stereogram_shader.Program, "bufferWidth"), width);
-        glUniform1i(glGetUniformLocation(stereogram_shader.Program, "bufferHeight"), height);
-
-        GLuint index = glGetSubroutineIndex(stereogram_shader.Program, GL_FRAGMENT_SHADER, "firstPass");
-        glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &index);
-
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glDisable(GL_DEPTH_TEST);
-
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, colorSSBO); 
-        GLint zero = 0;
-        glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32I, GL_RED_INTEGER, GL_INT, &zero);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, depthMap);
-        GLint textureLocation = glGetUniformLocation(stereogram_shader.Program, "depthMap");
-        glUniform1i(textureLocation, 0);
-
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, colorMap);
-        textureLocation = glGetUniformLocation(stereogram_shader.Program, "colorMap");
-        glUniform1i(textureLocation, 1);
-
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-        index = glGetSubroutineIndex(stereogram_shader.Program, GL_FRAGMENT_SHADER, "secondPass");
-        glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &index);
-
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
-        glEnable(GL_DEPTH_TEST);
+        stereoPass.execute(colorMap, depthMap, width, height, currentFrame, depthStrength);
 
         if (showMenu) {
             ImGui_ImplOpenGL3_NewFrame();
@@ -334,7 +256,6 @@ int main() {
         glfwSwapBuffers(window);
     }
 
-    stereogram_shader.Delete();
     illumin_shader.Delete();
 
     ImGui_ImplOpenGL3_Shutdown();
