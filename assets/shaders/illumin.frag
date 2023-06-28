@@ -16,7 +16,7 @@ void main() {
     vec3 V = normalize(vViewPosition);
     vec3 H = normalize(L + V);
 
-    float NdotL = max(dot(N, L), 0.0);
+    float NdotL = max(dot(N, L), 0.1);
     float specAngle = max(dot(H, N), 0.0);
     float specular = pow(specAngle, 300.0);
 

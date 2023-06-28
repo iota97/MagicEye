@@ -228,40 +228,29 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    /////////////////// CREATION OF BUFFER FOR THE DEPTH MAP /////////////////////////////////////////
-    // buffer dimension: too large -> performance may slow down if we have many lights; too small -> strong aliasing
-    GLuint depthMapFBO;
-    // we create a Frame Buffer Object: the first rendering step will render to this buffer, and not to the real frame buffer
+    GLuint depthMapFBO, depthMap, colorMap;
     glGenFramebuffers(1, &depthMapFBO);
-    // we create a texture for the depth map
-    GLuint depthMap;
+
     glGenTextures(1, &depthMap);
     glBindTexture(GL_TEXTURE_2D, depthMap);
-    // in the texture, we will save only the depth data of the fragments. Thus, we specify that we need to render only depth in the first rendering step
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    // we set to clamp the uv coordinates outside [0,1] to the color of the border
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     GLfloat borderColor[] = {1.0, 1.0, 1.0, 1.0};
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-    // we bind the depth map FBO
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
 
-    GLuint colorMap;
     glGenTextures(1, &colorMap);
     glBindTexture(GL_TEXTURE_2D, colorMap);
-    // in the texture, we will save only the depth data of the fragments. Thus, we specify that we need to render only depth in the first rendering step
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    // we set to clamp the uv coordinates outside [0,1] to the color of the border
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorMap, 0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -270,11 +259,16 @@ int main()
     // Projection matrix of the camera: FOV angle, aspect ratio, near and far planes
     glm::mat4 projection = glm::perspective(45.0f, (float)screenWidth/(float)screenHeight, 0.1f, 50.0f);
 
-    GLuint colorSSBO;
+    GLuint colorSSBO, uvSSBO;
     glGenBuffers(1, &colorSSBO);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, colorSSBO); 
     glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::ivec4) * width * height, nullptr, GL_DYNAMIC_COPY);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, colorSSBO);
+
+    glGenBuffers(1, &uvSSBO);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, uvSSBO);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::vec2) * width * height, nullptr, GL_DYNAMIC_COPY);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, uvSSBO);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     // Rendering loop: this code is executed at each frame
@@ -291,11 +285,7 @@ int main()
         // we apply FPS camera movements
         apply_camera_movements();
 
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, colorSSBO); 
-        GLint zero = 0;
-        glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32I, GL_RED_INTEGER, GL_INT, &zero);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
+        view = camera.GetViewMatrix();
         illumin_shader.Use();
         glUniformMatrix4fv(glGetUniformLocation(illumin_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(illumin_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
@@ -306,45 +296,46 @@ int main()
         RenderObjects(illumin_shader, planeModel, cubeModel, sphereModel, bunnyModel, SHADOWMAP, depthMap, colorMap);
         ///////////////////////////////////////////////////////////////////
 
-        // we get the view matrix from the Camera class
-        view = camera.GetViewMatrix();
-
-        // we activate back the standard Frame Buffer
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-        // we "clear" the frame and z buffer
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // we set the rendering mode
-        if (wireframe)
-            // Draw in wireframe
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        else
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-        // if animated rotation is activated, than we increment the rotation angle using delta time and the rotation speed parameter
-        if (spinning)
-            orientationY+=(deltaTime*spin_speed);
-
-        // we set the viewport for the final rendering step
-        glViewport(0, 0, width, height);
-
-        // We "install" the selected Shader Program as part of the current rendering process. 
         stereogram_shader.Use();
-        
-        // we pass projection and view matrices to the Shader Program
-        glUniformMatrix4fv(glGetUniformLocation(stereogram_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
-        glUniformMatrix4fv(glGetUniformLocation(stereogram_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
+        GLuint index = glGetSubroutineIndex(stereogram_shader.Program, GL_FRAGMENT_SHADER, "firstPass");
+        glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &index);
 
-        RenderObjects(stereogram_shader, planeModel, cubeModel, sphereModel, bunnyModel, RENDER, depthMap, colorMap);
-        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-        glClear(GL_DEPTH_BUFFER_BIT);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDisable(GL_DEPTH_TEST);
 
-        glUniform1f(glGetUniformLocation(stereogram_shader.Program, "final"), 1.0);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, colorSSBO); 
+        GLint zero = 0;
+        glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32I, GL_RED_INTEGER, GL_INT, &zero);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, depthMap);
+        GLint textureLocation = glGetUniformLocation(stereogram_shader.Program, "depthMap");
+        glUniform1i(textureLocation, 0);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, colorMap);
+        textureLocation = glGetUniformLocation(stereogram_shader.Program, "colorMap");
+        glUniform1i(textureLocation, 1);
+
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, textureID[2]);
+        textureLocation = glGetUniformLocation(stereogram_shader.Program, "random");
+        glUniform1i(textureLocation, 2);
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
-        // Swapping back and front buffers
+
+        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+        index = glGetSubroutineIndex(stereogram_shader.Program, GL_FRAGMENT_SHADER, "secondPass");
+        glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &index);
+
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+        glEnable(GL_DEPTH_TEST);
+
         glfwSwapBuffers(window);
     }
 
@@ -362,29 +353,6 @@ int main()
 // we render the objects. We pass also the current rendering step, and the depth map generated in the first step, which is used by the shaders of the second step
 void RenderObjects(Shader &shader, Model &planeModel, Model &cubeModel, Model &sphereModel, Model &bunnyModel, GLint render_pass, GLuint depthMap, GLuint colorMap)
 {
-    if (render_pass == RENDER) {
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, depthMap);
-        GLint textureLocation = glGetUniformLocation(shader.Program, "depthMap");
-        glUniform1i(textureLocation, 2);
-
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, textureID[2]);
-        textureLocation = glGetUniformLocation(shader.Program, "random");
-        glUniform1i(textureLocation, 3);
-
-        glActiveTexture(GL_TEXTURE4);
-        glBindTexture(GL_TEXTURE_2D, colorMap);
-        textureLocation = glGetUniformLocation(shader.Program, "colorMap");
-        glUniform1i(textureLocation, 4);
-
-        glUniform1f(glGetUniformLocation(shader.Program, "final"), 0.0);
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
-        return;
-    }
-
     // we pass the needed uniforms
     GLint textureLocation = glGetUniformLocation(shader.Program, "tex");
     GLint repeatLocation = glGetUniformLocation(shader.Program, "repeat");

@@ -4,15 +4,15 @@ LDFLAGS = -L/usr/lib -lassimp -lglfw -lz -lminizip
 SOURCES = main.cpp
 TARGET = magiceye
 
-build: glad.o main.o
+magiceye: glad.o main.o
 	$(CXX) -o $(TARGET) glad.o main.o $(LDFLAGS)
 
 .PHONY : clean
 clean :
 	-rm glad.o $(TARGET)
 
-main.o:
+main.o: main.cpp ./include/stb_image/stb_image.h
 	$(CXX) $(CXXFLAGS) -c main.cpp
 
-glad.o:
+glad.o: ./include/glad/glad.c ./include/glad/glad.c ./include/glad/glad.c ./include/glad/khrplatform.h
 	$(CXX) $(CXXFLAGS) -c ./include/glad/glad.c
