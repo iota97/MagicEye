@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-StereoPass::StereoPass() : shader(Shader("assets/shaders/stereogram.vert", "assets/shaders/stereogram.frag")) {
+StereoPass::StereoPass(Context *c) : shader(Shader("assets/shaders/stereogram.vert", "assets/shaders/stereogram.frag")), ctx(c) {
     // Create fullscreen quad
     GLfloat vertices[] = {
     1.0f,  1.0f, 0.0f,
@@ -47,25 +47,25 @@ StereoPass::~StereoPass() {
     shader.Delete();
 }
 
-void StereoPass::execute(GLuint colorMap, GLuint depthMap, int width, int height, float time, float depthStrength) {
+void StereoPass::execute(GLuint colorMap, GLuint depthMap) {
     shader.Use();
 
     // Keep the SSBO matching the screen size
-    if (oldH != height || oldW != width) {
+    if (oldH != ctx->height || oldW != ctx->width) {
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, colorSSBO); 
-        glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::ivec4) * width * height, nullptr, GL_DYNAMIC_COPY);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::ivec4) * ctx->width * ctx->height, nullptr, GL_DYNAMIC_COPY);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, uvSSBO);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::vec2) * width * height, nullptr, GL_DYNAMIC_COPY);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::vec2) * ctx->width * ctx->height, nullptr, GL_DYNAMIC_COPY);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-        oldH = height;
-        oldW = width;
+        oldH = ctx->height;
+        oldW = ctx->width;
     }
 
     // Pass uniform
-    glUniform1f(glGetUniformLocation(shader.Program, "time"), time);
-    glUniform1f(glGetUniformLocation(shader.Program, "depthStrength"), depthStrength);
-    glUniform1i(glGetUniformLocation(shader.Program, "bufferWidth"), width);
-    glUniform1i(glGetUniformLocation(shader.Program, "bufferHeight"), height);
+    glUniform1f(glGetUniformLocation(shader.Program, "time"), ctx->currentFrame);
+    glUniform1f(glGetUniformLocation(shader.Program, "depthStrength"), ctx->depthStrength);
+    glUniform1i(glGetUniformLocation(shader.Program, "bufferWidth"), ctx->width);
+    glUniform1i(glGetUniformLocation(shader.Program, "bufferHeight"), ctx->height);
 
     // Clear color SSBO
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, colorSSBO); 

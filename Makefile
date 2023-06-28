@@ -17,13 +17,13 @@ magiceye: $(OBJ)
 clean :
 	-rm  $(OBJ) $(TARGET) imgui.ini 
 
-main.o: main.cpp
+main.o: main.cpp ./src/Context.h
 	$(CXX) $(CXXFLAGS) -c main.cpp
 
-StereoPass.o: ./src/StereoPass.cpp ./src/StereoPass.h
+StereoPass.o: ./src/StereoPass.cpp ./src/StereoPass.h ./src/Context.h
 	$(CXX) $(CXXFLAGS) -c ./src/StereoPass.cpp
 
-ImGUI.o: ./src/ImGUI.cpp ./src/ImGUI.h $(IMGUI_HEADER)
+ImGUI.o: ./src/ImGUI.cpp ./src/ImGUI.h ./src/Context.h $(IMGUI_HEADER)
 	$(CXX) $(CXXFLAGS) -c ./src/ImGUI.cpp
 
 image.o: ./ext/utils/image.h ./ext/utils/image.cpp ./ext/stb_image/stb_image.h ./ext/utils/image.h

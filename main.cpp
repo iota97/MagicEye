@@ -1,7 +1,4 @@
 #include "glad/glad.h"
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -17,12 +14,14 @@
 #include "utils/image.h"
 
 #include "src/StereoPass.h"
+#include "src/ImGUI.h"
+#include "src/Context.h"
 
 // dimensions of application's window
 GLuint screenWidth = 1280, screenHeight = 720;
 
 // the rendering steps used in the application
-enum render_passes{ SHADOWMAP, RENDER};
+enum render_passes{ SHADOWMAP, RENDER };
 
 // callback functions for keyboard and mouse events
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -46,16 +45,6 @@ bool firstMouse = true;
 GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
 
-// rotation angle on Y axis
-GLfloat orientationY = 0.0f;
-// rotation speed on Y axis
-GLfloat spin_speed = 30.0f;
-// boolean to start/stop animated rotation on Y angle
-GLboolean spinning = GL_FALSE;
-
-// boolean to activate/deactivate wireframe rendering
-GLboolean wireframe = GL_FALSE;
-
 // View matrix: the camera moves, so we just set to indentity now
 glm::mat4 view = glm::mat4(1.0f);
 
@@ -71,28 +60,16 @@ glm::mat3 planeNormalMatrix = glm::mat3(1.0f);
 
 // we create a camera. We pass the initial position as a paramenter to the constructor. The last boolean tells if we want a camera "anchored" to the ground
 Camera camera(glm::vec3(0.0f, 0.0f, 7.0f), GL_FALSE);
-
-// in this example, we consider a directional light. We pass the direction of incoming light as an uniform to the shaders
 glm::vec3 lightDir0 = glm::vec3(1.0f, 1.0f, 1.0f);
 
-// weight for the diffusive component
-GLfloat Kd = 3.0f;
-// roughness index for GGX shader
-GLfloat alpha = 0.2f;
-// Fresnel reflectance at 0 degree (Schlik's approximation)
-GLfloat F0 = 0.9f;
 
-// vector for the textures IDs
 std::vector<GLint> textureID;
 
-// UV repetitions
-GLfloat repeat = 1.0;
 bool showMenu = false;
+static Context ctx;
 
-float depthStrength = 5;
-int width, height;
-/////////////////// MAIN function ///////////////////////
 int main() {
+
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -119,14 +96,13 @@ int main() {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // GLAD tries to load the context set by GLFW
-    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
-    {
+    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         std::cout << "Failed to initialize OpenGL context" << std::endl;
         return -1;
     }
 
     // we define the viewport dimensions
-    glfwGetFramebufferSize(window, &width, &height);
+    glfwGetFramebufferSize(window, &ctx.width, &ctx.height);
 
     // we enable Z test
     glEnable(GL_DEPTH_TEST);
@@ -153,7 +129,7 @@ int main() {
 
     glGenTextures(1, &depthMap);
     glBindTexture(GL_TEXTURE_2D, depthMap);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, ctx.width, ctx.height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -166,7 +142,7 @@ int main() {
 
     glGenTextures(1, &colorMap);
     glBindTexture(GL_TEXTURE_2D, colorMap);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ctx.width, ctx.height, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -178,48 +154,42 @@ int main() {
     ///////////////////////////////////////////////////////////////////
 
     // Projection matrix of the camera: FOV angle, aspect ratio, near and far planes
-    glm::mat4 projection = glm::perspective(45.0f, (float)width/(float)height, 0.1f, 50.0f);
+    glm::mat4 projection = glm::perspective(45.0f, (float)ctx.width/(float)ctx.height, 0.1f, 50.0f);
 
     auto deltas = std::vector<float>(256);
     int deltaIndex = 0;
 
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
-    ImGui::StyleColorsDark();
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init("#version 430");
+    float oldW = ctx.width;
+    float oldH = ctx.height;
 
-    float oldW = width;
-    float oldH = height;
+    StereoPass stereoPass(&ctx);
+    ImGUI imGUI(window, &ctx);
 
-    StereoPass stereoPass;
     // Rendering loop: this code is executed at each frame
     while (!glfwWindowShouldClose(window)) {
         // we determine the time passed from the beginning
         // and we calculate time difference between current frame rendering and the previous one
-        GLfloat currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+        ctx.currentFrame = glfwGetTime();
+        deltaTime = ctx.currentFrame - lastFrame;
+        lastFrame = ctx.currentFrame;
 
         deltas[deltaIndex = (deltaIndex+1) % 256] = deltaTime;
         float acc = 0.0;
         for (int i = 0; i < 256; i++) {
             acc += deltas[i];
         }
-        float FPS = 256/acc;
+        ctx.FPS = 256/acc;
 
-        if (oldH != height || oldW != width) {
-            projection = glm::perspective(45.0f, (float)width/(float)height, 0.1f, 50.0f);
+        if (oldH != ctx.height || oldW != ctx.width) {
+            projection = glm::perspective(45.0f, (float)ctx.width/(float)ctx.height, 0.1f, 50.0f);
 
             glBindTexture(GL_TEXTURE_2D, depthMap);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, ctx.width, ctx.height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
             glBindTexture(GL_TEXTURE_2D, colorMap);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ctx.width, ctx.height, 0, GL_RGBA, GL_FLOAT, NULL);
             glBindTexture(GL_TEXTURE_2D, 0);
-            oldH = height;
-            oldW = width;
+            oldH = ctx.height;
+            oldW = ctx.width;
         }
 
         glfwPollEvents();
@@ -230,37 +200,22 @@ int main() {
         glUniformMatrix4fv(glGetUniformLocation(illumin_shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(illumin_shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
         glUniform3fv(glGetUniformLocation(illumin_shader.Program, "lightVector"), 1, glm::value_ptr(lightDir0));
-        glViewport(0, 0, width, height);
+        glViewport(0, 0, ctx.width, ctx.height);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         RenderObjects(illumin_shader, planeModel, cubeModel, sphereModel, bunnyModel, SHADOWMAP, depthMap, colorMap);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        stereoPass.execute(colorMap, depthMap, width, height, currentFrame, depthStrength);
+        stereoPass.execute(colorMap, depthMap);
 
         if (showMenu) {
-            ImGui_ImplOpenGL3_NewFrame();
-            ImGui_ImplGlfw_NewFrame();
-            ImGui::NewFrame();
-
-            ImGui::Begin("Settings");
-            ImGui::Text("FPS: %.1f", FPS);
-            ImGui::SliderFloat("Depth strength", &depthStrength, 0.5f, 20.0f, "%.1f");
-            
-            ImGui::End();
-
-            ImGui::Render();
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            imGUI.RenderMenu();
         }
 
         glfwSwapBuffers(window);
     }
 
     illumin_shader.Delete();
-
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
 
     glfwTerminate();
     return 0;
@@ -306,13 +261,13 @@ void RenderObjects(Shader &shader, Model &planeModel, Model &cubeModel, Model &s
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureID[0]);
     glUniform1i(textureLocation, 0);
-    glUniform1f(repeatLocation, repeat);
+    glUniform1f(repeatLocation, 1.0);
 
     // we reset to identity at each frame
     sphereModelMatrix = glm::mat4(1.0f);
     sphereNormalMatrix = glm::mat3(1.0f);
     sphereModelMatrix = glm::translate(sphereModelMatrix, glm::vec3(-3.0f, 1.0f, 0.0f));
-    sphereModelMatrix = glm::rotate(sphereModelMatrix, glm::radians(orientationY), glm::vec3(0.0f, 1.0f, 0.0f));
+    sphereModelMatrix = glm::rotate(sphereModelMatrix, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     sphereModelMatrix = glm::scale(sphereModelMatrix, glm::vec3(0.8f, 0.8f, 0.8f));
     sphereNormalMatrix = glm::inverseTranspose(glm::mat3(view*sphereModelMatrix));
     glUniformMatrix4fv(glGetUniformLocation(shader.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(sphereModelMatrix));
@@ -326,7 +281,7 @@ void RenderObjects(Shader &shader, Model &planeModel, Model &cubeModel, Model &s
     cubeModelMatrix = glm::mat4(1.0f);
     cubeNormalMatrix = glm::mat3(1.0f);
     cubeModelMatrix = glm::translate(cubeModelMatrix, glm::vec3(0.0f, 1.0f, 0.0f));
-    cubeModelMatrix = glm::rotate(cubeModelMatrix, glm::radians(orientationY), glm::vec3(0.0f, 1.0f, 0.0f));
+    cubeModelMatrix = glm::rotate(cubeModelMatrix, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     cubeModelMatrix = glm::scale(cubeModelMatrix, glm::vec3(0.8f, 0.8f, 0.8f));
     cubeNormalMatrix = glm::inverseTranspose(glm::mat3(view*cubeModelMatrix));
     glUniformMatrix4fv(glGetUniformLocation(shader.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(cubeModelMatrix));
@@ -340,7 +295,7 @@ void RenderObjects(Shader &shader, Model &planeModel, Model &cubeModel, Model &s
     bunnyModelMatrix = glm::mat4(1.0f);
     bunnyNormalMatrix = glm::mat3(1.0f);
     bunnyModelMatrix = glm::translate(bunnyModelMatrix, glm::vec3(3.0f, 1.0f, 0.0f));
-    bunnyModelMatrix = glm::rotate(bunnyModelMatrix, glm::radians(orientationY), glm::vec3(0.0f, 1.0f, 0.0f));
+    bunnyModelMatrix = glm::rotate(bunnyModelMatrix, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     bunnyModelMatrix = glm::scale(bunnyModelMatrix, glm::vec3(0.3f, 0.3f, 0.3f));
     bunnyNormalMatrix = glm::inverseTranspose(glm::mat3(view*bunnyModelMatrix));
     glUniformMatrix4fv(glGetUniformLocation(shader.Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(bunnyModelMatrix));
@@ -395,6 +350,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int w, int h) {
-    width = w;
-    height = h;
+    ctx.width = w;
+    ctx.height = h;
 }
