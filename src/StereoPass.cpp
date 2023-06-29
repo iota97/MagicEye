@@ -64,7 +64,7 @@ void StereoPass::execute(GLuint colorMap, GLuint depthMap) {
     // Pass uniform
     glUniform1i(glGetUniformLocation(shader.Program, "bufferWidth"), ctx->width);
     glUniform1i(glGetUniformLocation(shader.Program, "bufferHeight"), ctx->height);
-    glUniform1f(glGetUniformLocation(shader.Program, "time"), ctx->currentFrame);
+    glUniform1f(glGetUniformLocation(shader.Program, "time"), ctx->staticPattern ? 1.0 : fmod(ctx->currentFrame, 60.0));
     glUniform1f(glGetUniformLocation(shader.Program, "depthStrength"), ctx->depthStrength);
     glUniform1f(glGetUniformLocation(shader.Program, "eyeSep"), ctx->eyeSep);
     glUniform1f(glGetUniformLocation(shader.Program, "obsDistance"), ctx->obsDistance);
@@ -90,16 +90,33 @@ void StereoPass::execute(GLuint colorMap, GLuint depthMap) {
     // Bind quad
     glBindVertexArray(VAO);
 
+    // Select random subroutine
+    GLuint index[2];
+    switch (ctx->pattern) {
+        case 0:
+            index[0] = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, "randomDots");
+            break;
+        case 1:
+            index[0] = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, "randomDotsRGB");
+            break;
+        case 2:
+            index[0] = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, "perlinNoise");
+            break;
+        case 3:
+            index[0] = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, "perlinNoiseRGB");
+            break;
+    }
+
     // First pass
     glDisable(GL_DEPTH_TEST);
-    GLuint index = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, "firstPass");
-    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &index);
+    index[1] = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, "firstPass");
+    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, index);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     // Second pass, barrier needed
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-    index = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, "secondPass");
-    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &index);
+    index[1] = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, "secondPass");
+    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, index);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     // Clean up

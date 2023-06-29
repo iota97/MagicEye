@@ -10,6 +10,7 @@ ImGUI::ImGUI(GLFWwindow *w, Context *c) : ctx(c) {
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    io.IniFilename = NULL;
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(w, true);
     ImGui_ImplOpenGL3_Init("#version 430");
@@ -48,6 +49,14 @@ void ImGUI::RenderMenu() {
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
     ImGui::SliderFloat("Scene color strength", &ctx->sceneColorStr, 0.0f, 1.0f, "%.1f");
     ImGui::SliderFloat("Edge strength", &ctx->edgeStr, 0.0f, 2.0f, "%.1f");
+    ImGui::Dummy(ImVec2(0.0f, 10.0f));
+
+    const char* items[] = { "Random dots", "Random dots (RGB)", "Perlin noise", "Perlin noise (RGB)" };
+    ImGui::Combo("Pattern", &ctx->pattern, items, IM_ARRAYSIZE(items));
+    ImGui::SameLine();
+    ImGui::Checkbox("Static", &ctx->staticPattern);
+
+
     ImGui::End();
 
     ImGui::Render();

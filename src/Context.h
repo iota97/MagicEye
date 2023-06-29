@@ -19,4 +19,6 @@ struct Context {
     float sceneColorStr = 0.3;
     float edgeStr = 0.0;
     bool stereoRendering = true;
+    bool staticPattern = false;
+    int pattern = 2;
 };
