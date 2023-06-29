@@ -15,7 +15,7 @@ public:
 private:
     Shader shader;
     GLuint VAO;
-    GLuint colorSSBO, uvSSBO;
+    GLuint colorSSBO, uvSSBO, edgeSSBO;
     std::vector<GLuint> pattern;
     int oldW = -1, oldH = -1;
     Context *ctx;

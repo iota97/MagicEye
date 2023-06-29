@@ -41,6 +41,10 @@ StereoPass::StereoPass(Context *c) : shader("assets/shaders/stereogram.vert", "a
     glGenBuffers(1, &uvSSBO);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, uvSSBO);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, uvSSBO);
+
+    glGenBuffers(1, &edgeSSBO);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, edgeSSBO);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, edgeSSBO);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     // Load pattern texture
@@ -65,6 +69,8 @@ void StereoPass::execute(GLuint colorMap, GLuint depthMap) {
         glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::ivec4) * ctx->width * ctx->height, nullptr, GL_DYNAMIC_COPY);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, uvSSBO);
         glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(glm::vec2) * ctx->width * ctx->height, nullptr, GL_DYNAMIC_COPY);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, edgeSSBO);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(GLint) * ctx->width * ctx->height, nullptr, GL_DYNAMIC_COPY);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
         oldH = ctx->height;
         oldW = ctx->width;
@@ -81,9 +87,11 @@ void StereoPass::execute(GLuint colorMap, GLuint depthMap) {
     glUniform1f(glGetUniformLocation(shader.Program, "edgeStr"), ctx->edgeStr);
     glUniform1f(glGetUniformLocation(shader.Program, "edgeThreshold"), ctx->edgeThreshold);
 
-    // Clear color SSBO
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, colorSSBO); 
+    // Clear color and edge SSBO
     GLint zero = 0;
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, colorSSBO); 
+    glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32I, GL_RED_INTEGER, GL_INT, &zero);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, edgeSSBO); 
     glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32I, GL_RED_INTEGER, GL_INT, &zero);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 

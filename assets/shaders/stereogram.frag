@@ -25,6 +25,10 @@ layout (std430, binding = 1) coherent buffer Uv {
   vec2 UV[];
 };
 
+layout (std430, binding = 2) coherent buffer Edge {
+  int edge[];
+};
+
 subroutine vec3 randomPattern(vec2 co);
 subroutine uniform randomPattern pattern;
 
@@ -183,17 +187,22 @@ subroutine (stereoPass) vec4 firstPass() {
     atomicAdd(color[i].r, int(col.r*255));
     atomicAdd(color[i].g, int(col.g*255));
     atomicAdd(color[i].b, int(col.b*255));
-    atomicAdd(color[i].a, checkEdge(uv) ? int(edgeStr*8) + 1: 1);
+    atomicAdd(color[i].a, 1);
 
+    if (checkEdge(uv)) {
+        atomicExchange(edge[i], 1);
+    }
     return vec4(0.0);
 } 
 
 subroutine (stereoPass) vec4 secondPass() {
     vec2 co = UV[index(uv)];
-    vec3 random = pattern(co);
     int i = index(co);
-    vec3 col = vec4(color[i]/(color[i].w*255.0)).rgb;
-    return vec4(mix(col, random, 1.0-sceneColorStr), 1.0);
+    vec3 random = pattern(co);
+    vec3 col = color[i].rgb/(color[i].w*255.0);
+    col = mix(col, random, 1.0-sceneColorStr);
+    float edgeFactor = bool(edge[i]) ? 1.0-edgeStr : 1.0;
+    return vec4(col*edgeFactor, 1.0);
 }
 
 void main() {

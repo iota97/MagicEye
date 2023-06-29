@@ -48,18 +48,16 @@ void ImGUI::RenderMenu() {
 
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
     ImGui::SliderFloat("Scene color", &ctx->sceneColorStr, 0.0f, 1.0f, "%.1f");
-    ImGui::SliderFloat("Edge strength", &ctx->edgeStr, 0.0f, 4.0f, "%.1f");
+    ImGui::SliderFloat("Edge strength", &ctx->edgeStr, 0.0f, 1.0f, "%.1f");
     ImGui::SliderFloat("Edge threshold", &ctx->edgeThreshold, 0.0f, 2.0f, "%.2f");
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
-    const char* items[] = {"Perlin noise", "Perlin noise (RGB)", "RGB noise", "Gray pattern", "Cubes", "Symbols", "Wavy"};
+    const char* items[] = {"Perlin noise", "Perlin noise (RGB)", "RGB noise", "Colorful", "Cubes", "Symbols", "Wavy"};
     ImGui::Combo("Pattern", &ctx->pattern, items, IM_ARRAYSIZE(items));
     ImGui::SameLine();
     ImGui::Checkbox("Static", &ctx->staticPattern);
 
-
     ImGui::End();
-
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
