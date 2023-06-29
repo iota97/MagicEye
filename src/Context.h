@@ -9,16 +9,19 @@ struct Context {
     float currentFrame;
     float deltaTime;
 
-    // Settings
+    // Miscs
     bool showMenu = false;
     bool flyingCamera = true;
     bool vSync = true;
+
+    // Sterogram setting
+    bool stereoRendering = true;
     float depthStrength = 5.0;
     float eyeSep = 0.5;
     float obsDistance = 1.8;
     float sceneColorStr = 0.7;
-    float edgeStr = 0.0;
-    bool stereoRendering = true;
-    bool staticPattern = false;
-    int pattern = 0;
+    float edgeStr = 1.0;
+    float edgeThreshold = 0.5;
+    bool staticPattern = true;
+    int pattern = 5;
 };

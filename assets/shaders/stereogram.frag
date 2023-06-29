@@ -15,6 +15,7 @@ uniform float obsDistance;
 uniform float edgeStr;
 uniform float sceneColorStr;
 uniform float depthStrength;
+uniform float edgeThreshold;
 
 layout (std430, binding = 0) coherent buffer Color {
   ivec4 color[];
@@ -108,17 +109,31 @@ float sampleDepth(vec2 uv) {
     return pow(texture(depthMap, uv).r, depthStrength);
 }
 
+
+void make_kernel(inout vec4 n[9], sampler2D tex, vec2 coord) {
+	float w = 1.0 / textureSize(tex, 0).x;
+	float h = 1.0 / textureSize(tex, 0).y;
+
+	n[0] = texture2D(tex, coord + vec2( -w, -h));
+	n[1] = texture2D(tex, coord + vec2(0.0, -h));
+	n[2] = texture2D(tex, coord + vec2(  w, -h));
+	n[3] = texture2D(tex, coord + vec2( -w, 0.0));
+	n[4] = texture2D(tex, coord);
+	n[5] = texture2D(tex, coord + vec2(  w, 0.0));
+	n[6] = texture2D(tex, coord + vec2( -w, h));
+	n[7] = texture2D(tex, coord + vec2(0.0, h));
+	n[8] = texture2D(tex, coord + vec2(  w, h));
+}
+
 bool checkEdge(vec2 co) {
-    vec2 texelSize = 2.0/textureSize(colorMap, 0);
-    co -= mod(co, texelSize);
-    vec3 luma = vec3(0.299, 0.587, 0.114);
-    float col = 0.0;
-    col += 4*dot(texture(colorMap, co).rgb, luma);
-    col -= dot(texture(colorMap, co + vec2(1.0, 0.0)*texelSize).rgb, luma);
-    col -= dot(texture(colorMap, co + vec2(-1.0, 0.0)*texelSize).rgb, luma);
-    col -= dot(texture(colorMap, co + vec2(0.0, 1.0)*texelSize).rgb, luma);
-    col -= dot(texture(colorMap, co + vec2(0.0, -1.0)*texelSize).rgb, luma);
-    return col > 0.15;
+    vec4 n[9];
+	make_kernel(n, colorMap, uv);
+
+	vec4 sobel_edge_h = n[2] + (2.0*n[5]) + n[8] - (n[0] + (2.0*n[3]) + n[6]);
+  	vec4 sobel_edge_v = n[0] + (2.0*n[1]) + n[2] - (n[6] + (2.0*n[7]) + n[8]);
+	vec4 sobel = sqrt((sobel_edge_h * sobel_edge_h) + (sobel_edge_v * sobel_edge_v));
+
+	return length(sobel.rgb) > edgeThreshold;
 }
 
 subroutine (randomPattern) vec3 perlinNoise(vec2 co) {

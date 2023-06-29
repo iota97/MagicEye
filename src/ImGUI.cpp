@@ -47,8 +47,9 @@ void ImGUI::RenderMenu() {
     ImGui::SliderFloat("Observer distance", &ctx->obsDistance, 0.1f, 5.0f, "%.1f");
 
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
-    ImGui::SliderFloat("Scene color strength", &ctx->sceneColorStr, 0.0f, 1.0f, "%.1f");
-    ImGui::SliderFloat("Edge strength", &ctx->edgeStr, 0.0f, 2.0f, "%.1f");
+    ImGui::SliderFloat("Scene color", &ctx->sceneColorStr, 0.0f, 1.0f, "%.1f");
+    ImGui::SliderFloat("Edge strength", &ctx->edgeStr, 0.0f, 4.0f, "%.1f");
+    ImGui::SliderFloat("Edge threshold", &ctx->edgeThreshold, 0.0f, 2.0f, "%.2f");
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
     const char* items[] = {"Perlin noise", "Perlin noise (RGB)", "RGB noise", "Gray pattern", "Cubes", "Symbols", "Wavy"};

@@ -15,7 +15,7 @@ magiceye: $(OBJ)
 
 .PHONY : clean
 clean :
-	-rm  $(OBJ) $(TARGET) imgui.ini 
+	-rm  $(OBJ) $(TARGET)
 
 main.o: main.cpp ./src/Context.h
 	$(CXX) $(CXXFLAGS) -c main.cpp

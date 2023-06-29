@@ -79,6 +79,7 @@ void StereoPass::execute(GLuint colorMap, GLuint depthMap) {
     glUniform1f(glGetUniformLocation(shader.Program, "obsDistance"), ctx->obsDistance);
     glUniform1f(glGetUniformLocation(shader.Program, "sceneColorStr"), ctx->sceneColorStr);
     glUniform1f(glGetUniformLocation(shader.Program, "edgeStr"), ctx->edgeStr);
+    glUniform1f(glGetUniformLocation(shader.Program, "edgeThreshold"), ctx->edgeThreshold);
 
     // Clear color SSBO
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, colorSSBO); 
