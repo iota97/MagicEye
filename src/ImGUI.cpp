@@ -51,7 +51,7 @@ void ImGUI::RenderMenu() {
     ImGui::SliderFloat("Edge strength", &ctx->edgeStr, 0.0f, 2.0f, "%.1f");
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
-    const char* items[] = { "Random dots", "Random dots (RGB)", "Perlin noise", "Perlin noise (RGB)" };
+    const char* items[] = {"Perlin noise", "Perlin noise (RGB)", "RGB noise", "Gray pattern", "Cubes", "Symbols", "Wavy"};
     ImGui::Combo("Pattern", &ctx->pattern, items, IM_ARRAYSIZE(items));
     ImGui::SameLine();
     ImGui::Checkbox("Static", &ctx->staticPattern);

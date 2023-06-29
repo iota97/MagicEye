@@ -16,9 +16,9 @@ struct Context {
     float depthStrength = 5.0;
     float eyeSep = 0.5;
     float obsDistance = 1.8;
-    float sceneColorStr = 0.3;
+    float sceneColorStr = 0.7;
     float edgeStr = 0.0;
     bool stereoRendering = true;
     bool staticPattern = false;
-    int pattern = 2;
+    int pattern = 0;
 };

@@ -1,6 +1,7 @@
 #include "glad/glad.h"
 #include "StereoPass.h"
 #include "utils/shader.h"
+#include "utils/image.h"
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
@@ -41,6 +42,14 @@ StereoPass::StereoPass(Context *c) : shader("assets/shaders/stereogram.vert", "a
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, uvSSBO);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, uvSSBO);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+    // Load pattern texture
+    pattern.push_back(LoadTexture("assets/textures/patterns/pat0.png"));
+    pattern.push_back(LoadTexture("assets/textures/patterns/pat1.png"));
+    pattern.push_back(LoadTexture("assets/textures/patterns/pat2.png"));
+    pattern.push_back(LoadTexture("assets/textures/patterns/pat3.png"));
+    pattern.push_back(LoadTexture("assets/textures/patterns/pat4.png"));
+    pattern.push_back(LoadTexture("assets/textures/patterns/pat5.png"));
 }
 
 StereoPass::~StereoPass() {
@@ -64,7 +73,7 @@ void StereoPass::execute(GLuint colorMap, GLuint depthMap) {
     // Pass uniform
     glUniform1i(glGetUniformLocation(shader.Program, "bufferWidth"), ctx->width);
     glUniform1i(glGetUniformLocation(shader.Program, "bufferHeight"), ctx->height);
-    glUniform1f(glGetUniformLocation(shader.Program, "time"), ctx->staticPattern ? 1.0 : fmod(ctx->currentFrame, 60.0));
+    glUniform1f(glGetUniformLocation(shader.Program, "time"), ctx->staticPattern ? 1.0 : ctx->currentFrame);
     glUniform1f(glGetUniformLocation(shader.Program, "depthStrength"), ctx->depthStrength);
     glUniform1f(glGetUniformLocation(shader.Program, "eyeSep"), ctx->eyeSep);
     glUniform1f(glGetUniformLocation(shader.Program, "obsDistance"), ctx->obsDistance);
@@ -94,17 +103,22 @@ void StereoPass::execute(GLuint colorMap, GLuint depthMap) {
     GLuint index[2];
     switch (ctx->pattern) {
         case 0:
-            index[0] = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, "randomDots");
-            break;
-        case 1:
-            index[0] = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, "randomDotsRGB");
-            break;
-        case 2:
             index[0] = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, "perlinNoise");
             break;
-        case 3:
+        case 1:
             index[0] = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, "perlinNoiseRGB");
             break;
+        default:
+            index[0] = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, "texturePattern");
+            break;
+    }
+    
+    // Bind pattern texture
+    if (ctx->pattern > 1) {
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, pattern[ctx->pattern-2]);
+        textureLocation = glGetUniformLocation(shader.Program, "randomTexture");
+        glUniform1i(textureLocation, 2);
     }
 
     // First pass

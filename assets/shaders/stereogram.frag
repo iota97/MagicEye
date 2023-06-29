@@ -5,7 +5,7 @@ out vec4 colorFrag;
 
 uniform sampler2D depthMap;
 uniform sampler2D colorMap;
-uniform sampler2D uvMap;
+uniform sampler2D randomTexture;
 
 uniform int bufferWidth;
 uniform int bufferHeight;
@@ -24,7 +24,7 @@ layout (std430, binding = 1) coherent buffer Uv {
   vec2 UV[];
 };
 
-subroutine vec3 randomPattern();
+subroutine vec3 randomPattern(vec2 co);
 subroutine uniform randomPattern pattern;
 
 subroutine vec4 stereoPass();
@@ -121,38 +121,34 @@ bool checkEdge(vec2 co) {
     return col > 0.15;
 }
 
-subroutine (randomPattern) vec3 randomDots() {
-    return vec3(rand(uv*time));
-} 
-
-subroutine (randomPattern) vec3 randomDotsRGB() {
-    return vec3(rand(uv*time), rand(uv+time), rand(uv*time+time*2.0));
-} 
-
-subroutine (randomPattern) vec3 perlinNoise() {
+subroutine (randomPattern) vec3 perlinNoise(vec2 co) {
     vec3 random = vec3(0.3);
-    random += vec3(snoise(vec3(uv*32.0, time)));
-    random += 0.5*vec3(snoise(vec3(uv*64.0, time*2.0)));
-    random += 0.25*vec3(snoise(vec3(uv*128.0, time*4.0)));
-    random += 0.125*vec3(snoise(vec3(uv*256.0, time*8.0)));
+    random += vec3(snoise(vec3(co*32.0, time)));
+    random += 0.5*vec3(snoise(vec3(co*64.0, time*2.0)));
+    random += 0.25*vec3(snoise(vec3(co*128.0, time*4.0)));
+    random += 0.125*vec3(snoise(vec3(co*256.0, time*8.0)));
     return random;
 } 
 
-subroutine (randomPattern) vec3 perlinNoiseRGB() {
+subroutine (randomPattern) vec3 perlinNoiseRGB(vec2 co) {
     vec3 random = vec3(0.3);
-    random += vec3(snoise(vec3(uv*32.0, time)), 
-            snoise(vec3(uv*32.0, time+16.0)), 
-            snoise(vec3(uv*32.0, time+32.0)));
-    random += 0.5*vec3(snoise(vec3(uv*64.0, time*2.0)),
-            snoise(vec3(uv*64.0, time*2.0-16.0)),
-            snoise(vec3(uv*64.0, time*2.0-32.0)));
-    random += 0.25*vec3(snoise(vec3(uv*128.0, time*4.0)),
-            snoise(vec3(uv*128.0, time*4.0+2.0)),
-            snoise(vec3(uv*128.0, time*4.0-2.0)));
-    random += 0.125*vec3(snoise(vec3(uv*256.0, time*8.0)),
-            snoise(vec3(uv*256.0, time*8.0+7.0)),
-            snoise(vec3(uv*256.0, time*8.0-7.0)));
+    random += vec3(snoise(vec3(co*32.0, time)), 
+            snoise(vec3(co*32.0, time+16.0)), 
+            snoise(vec3(co*32.0, time+32.0)));
+    random += 0.5*vec3(snoise(vec3(co*64.0, time*2.0)),
+            snoise(vec3(co*64.0, time*2.0-16.0)),
+            snoise(vec3(co*64.0, time*2.0-32.0)));
+    random += 0.25*vec3(snoise(vec3(co*128.0, time*4.0)),
+            snoise(vec3(co*128.0, time*4.0+2.0)),
+            snoise(vec3(co*128.0, time*4.0-2.0)));
+    random += 0.125*vec3(snoise(vec3(co*256.0, time*8.0)),
+            snoise(vec3(co*256.0, time*8.0+7.0)),
+            snoise(vec3(co*256.0, time*8.0-7.0)));
     return random;
+} 
+
+subroutine (randomPattern) vec3 texturePattern(vec2 co) {
+    return texture(randomTexture, co*6.0+vec2(cos(time*0.2), sin(time*0.2))).rgb;
 } 
 
 subroutine (stereoPass) vec4 firstPass() {
@@ -167,9 +163,7 @@ subroutine (stereoPass) vec4 firstPass() {
     currCoord.x = mod(currCoord.x, 1.0);
     UV[index(uv)] = currCoord;
 
-    vec3 random = pattern();
-    vec3 col = mix(texture(colorMap, uv).rgb, random, 1.0-sceneColorStr);
-
+    vec3 col = texture(colorMap, uv).rgb;
     int i = index(currCoord);
     atomicAdd(color[i].r, int(col.r*255));
     atomicAdd(color[i].g, int(col.g*255));
@@ -180,8 +174,11 @@ subroutine (stereoPass) vec4 firstPass() {
 } 
 
 subroutine (stereoPass) vec4 secondPass() {
-    int i = index(UV[index(uv)]);
-    return vec4(color[i]/(color[i].w*255.0));
+    vec2 co = UV[index(uv)];
+    vec3 random = pattern(co);
+    int i = index(co);
+    vec3 col = vec4(color[i]/(color[i].w*255.0)).rgb;
+    return vec4(mix(col, random, 1.0-sceneColorStr), 1.0);
 }
 
 void main() {
