@@ -36,7 +36,10 @@ void ImGUI::RenderMenu() {
     if (ImGui::Button("Quit")) {
         ctx->shouldClose = true;
     }
+    const char* scene[] = {"Void", "Cube"};
+    ImGui::Combo("Scene", &ctx->sceneId, scene, IM_ARRAYSIZE(scene));
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
+
     ImGui::Checkbox("VSync", &ctx->vSync);
     ImGui::SameLine();
     ImGui::Checkbox("Stereogram Rendering", &ctx->stereoRendering);
@@ -52,8 +55,8 @@ void ImGUI::RenderMenu() {
     ImGui::SliderFloat("Edge threshold", &ctx->edgeThreshold, 0.0f, 2.0f, "%.2f");
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
-    const char* items[] = {"Perlin noise", "Perlin noise (RGB)", "RGB noise", "Colorful", "Cubes", "Symbols", "Wavy"};
-    ImGui::Combo("Pattern", &ctx->pattern, items, IM_ARRAYSIZE(items));
+    const char* pattern[] = {"Perlin noise", "Perlin noise (RGB)", "RGB noise", "Colorful", "Cubes", "Symbols", "Wavy"};
+    ImGui::Combo("Pattern", &ctx->pattern, pattern, IM_ARRAYSIZE(pattern));
     ImGui::SameLine();
     ImGui::Checkbox("Static", &ctx->staticPattern);
 

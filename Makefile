@@ -1,5 +1,5 @@
 CXX = c++
-CXXFLAGS  = -g -O2 -x c++ -Wall -Wno-invalid-offsetof -std=c++11 -I./ext
+CXXFLAGS  = -g -O2 -Wall -Wno-invalid-offsetof -std=c++11 -I./ext
 LDFLAGS = -L/usr/lib -lassimp -lglfw -lz -lminizip -lGL
 TARGET = magiceye
 
@@ -8,7 +8,7 @@ IMGUI_HEADER = ./ext/imgui/imconfig.h ./ext/imgui/imgui_internal.h ./ext/imgui/i
 	./ext/imgui/imgui_impl_opengl3.h ./ext/imgui/imgui_impl_glfw.h ./ext/imgui/imgui_impl_opengl3_loader.h
 
 OBJ = main.o image.o glad.o imgui.o imgui_draw.o imgui_tables.o imgui_widgets.o imgui_impl_opengl3.o imgui_impl_glfw.o \
-	StereoPass.o ImGUI.o SceneCamera.o IllumPass.o Render.o
+	StereoPass.o ImGUI.o SceneCamera.o IllumPass.o Render.o Scene.o SceneManager.o
 
 magiceye: $(OBJ) 
 	$(CXX) -o $(TARGET) $(OBJ) $(LDFLAGS)
@@ -17,13 +17,19 @@ magiceye: $(OBJ)
 clean :
 	-rm  $(OBJ) $(TARGET)
 
-main.o: main.cpp ./src/Context.h
+main.o: main.cpp ./src/Context.h ./src/Scene.h ./src/Render.h
 	$(CXX) $(CXXFLAGS) -c main.cpp
+
+SceneManager.o: ./src/SceneManager.cpp ./src/SceneManager.h ./src/Scene.h
+	$(CXX) $(CXXFLAGS) -c ./src/SceneManager.cpp
+
+Scene.o: ./src/Scene.cpp ./src/Scene.h ./src/Object.h
+	$(CXX) $(CXXFLAGS) -c ./src/Scene.cpp
 
 Render.o: ./src/Render.cpp ./src/Render.h ./src/Context.h
 	$(CXX) $(CXXFLAGS) -c ./src/Render.cpp
 	
-IllumPass.o: ./src/IllumPass.cpp ./src/IllumPass.h ./src/Context.h
+IllumPass.o: ./src/IllumPass.cpp ./src/IllumPass.h ./src/Context.h ./src/Object.h
 	$(CXX) $(CXXFLAGS) -c ./src/IllumPass.cpp
 
 SceneCamera.o: ./src/SceneCamera.cpp ./src/SceneCamera.h ./src/Context.h

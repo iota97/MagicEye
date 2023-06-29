@@ -134,7 +134,6 @@ public:
         this->UpdateCameraVectors();
     }
 
-private:
     //////////////////////////////////////////
     // it updates the camera reference system
     void UpdateCameraVectors()

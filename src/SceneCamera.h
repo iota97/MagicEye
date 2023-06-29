@@ -6,9 +6,12 @@
 
 class SceneCamera {
 public:
-    SceneCamera(glm::vec3 position, GLFWwindow *w, Context *ctx);
+    SceneCamera(const glm::vec3 &position, GLFWwindow *w, Context *ctx);
     void Process();
     glm::mat4 GetViewMatrix();
+    glm::mat4 GetProjectionMatrix();
+    void SetPosition(const glm::vec3 &pos);
+    void SetRotation(GLfloat yaw, GLfloat pitch);
 
 private:
     Camera camera;

@@ -35,7 +35,13 @@ Render::Render(GLFWwindow *w, Context *c) : ctx(c), window(w), illumPass(ctx), s
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Render::Process(SceneCamera *scene) {
+Render::~Render() {
+    glDeleteTextures(1, &colorMap);
+    glDeleteTextures(1, &depthMap);
+    glDeleteFramebuffers(1, &FBO);
+}
+
+void Render::Process(Scene *scene) {
     // Delta time calculation
     ctx->currentFrame = glfwGetTime();
     ctx->deltaTime = ctx->currentFrame - lastFrame;
@@ -52,16 +58,11 @@ void Render::Process(SceneCamera *scene) {
         oldW = ctx->width;
     }
 
-    // Camera and scene setup
-    glm::mat4 projection = glm::perspective(45.0f, (float)ctx->width/ctx->height, 0.1f, 50.0f);
-    glm::mat4 view = scene->GetViewMatrix();
-    glm::vec3 lightDir0 = glm::vec3(1.0f, 1.0f, 1.0f);
-
     // Illumination pass
     glViewport(0, 0, ctx->width, ctx->height);
     glBindFramebuffer(GL_FRAMEBUFFER, ctx->stereoRendering ? FBO : 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    illumPass.execute(projection, view, lightDir0);
+    illumPass.execute(scene);
 
     // Stereogram pass
     if (ctx->stereoRendering) {

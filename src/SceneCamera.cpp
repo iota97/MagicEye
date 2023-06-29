@@ -50,7 +50,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     }
 }
 
-SceneCamera::SceneCamera(glm::vec3 position, GLFWwindow *w, Context *c) : camera(position, GL_FALSE), window(w), ctx(c) {
+SceneCamera::SceneCamera(const glm::vec3 &position, GLFWwindow *w, Context *c) : camera(position, GL_FALSE), window(w), ctx(c) {
     glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -60,6 +60,20 @@ SceneCamera::SceneCamera(glm::vec3 position, GLFWwindow *w, Context *c) : camera
 
 glm::mat4 SceneCamera::GetViewMatrix() {
     return camera.GetViewMatrix();
+}
+
+glm::mat4 SceneCamera::GetProjectionMatrix() {
+    return glm::perspective(45.0f, (float)ctx->width/ctx->height, 0.1f, 50.0f);
+}
+
+void SceneCamera::SetPosition(const glm::vec3 &pos) {
+    camera.Position = pos;
+}
+
+void SceneCamera::SetRotation(GLfloat yaw, GLfloat pitch) {
+    camera.Yaw = yaw;
+    camera.Pitch = pitch;
+    camera.UpdateCameraVectors();
 }
 
 void SceneCamera::Process() {

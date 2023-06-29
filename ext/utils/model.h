@@ -29,7 +29,7 @@ Universita' degli Studi di Milano
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
+#include <iostream>
 // we include the Mesh class, which manages the "OpenGL side" (= creation and allocation of VBO, VAO, EBO buffers) of the loading of models
 #include <utils/mesh.h>
 

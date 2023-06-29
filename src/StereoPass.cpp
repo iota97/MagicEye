@@ -17,7 +17,6 @@ StereoPass::StereoPass(Context *c) : shader("assets/shaders/stereogram.vert", "a
         0, 1, 3,
         1, 2, 3
     };
-    GLuint VBO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -57,7 +56,23 @@ StereoPass::StereoPass(Context *c) : shader("assets/shaders/stereogram.vert", "a
 }
 
 StereoPass::~StereoPass() {
+    // Shader
     shader.Delete();
+
+    // Quad
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+
+    // SSBO
+    glDeleteBuffers(1, &colorSSBO);
+    glDeleteBuffers(1, &uvSSBO);
+    glDeleteBuffers(1, &edgeSSBO);
+
+    // Patterns
+    for (auto &t : pattern) {
+        glDeleteTextures(1, &t);
+    }
 }
 
 void StereoPass::execute(GLuint colorMap, GLuint depthMap) {

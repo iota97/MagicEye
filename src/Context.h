@@ -9,7 +9,8 @@ struct Context {
     float currentFrame;
     float deltaTime;
 
-    // Miscs
+    // Misc
+    int sceneId = 0;
     bool showMenu = false;
     bool flyingCamera = true;
     bool vSync = true;

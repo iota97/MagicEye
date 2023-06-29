@@ -2,17 +2,18 @@
 
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
-#include <vector>
 #include "Context.h"
-#include "SceneCamera.h"
 #include "StereoPass.h"
 #include "IllumPass.h"
 #include "ImGUI.h"
+#include "Scene.h"
 
 class Render {
 public:
     Render(GLFWwindow *w, Context *c);
-    void Process(SceneCamera *scene);
+    ~Render();
+
+    void Process(Scene *scene);
 
 private:
     Context *ctx;

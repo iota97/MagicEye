@@ -1,18 +1,8 @@
 #include "glad/glad.h"
-
 #include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/matrix_inverse.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include "utils/shader.h"
-#include "utils/model.h"
-#include "utils/camera.h"
-#include "utils/image.h"
 
 #include "src/Context.h"
-#include "src/SceneCamera.h"
+#include "src/SceneManager.h"
 #include "src/Render.h"
 
 GLuint screenWidth = 1280, screenHeight = 720;
@@ -30,7 +20,7 @@ int main() {
     if (!window) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
-         return -1;
+        return -1;
     }
 
     glfwMakeContextCurrent(window);
@@ -39,13 +29,13 @@ int main() {
         return -1;
     }
 
-    // Scene first, will break ImGUI callbacks otherwise
-    SceneCamera sceneCamera(glm::vec3(0.0f, 0.0f, 7.0f), window, &ctx);
+    // Scene manager first, will break ImGUI callbacks otherwise...
+    SceneManager sceneManager(window, &ctx);
     Render render(window, &ctx);
 
     while (!glfwWindowShouldClose(window)) {
-        sceneCamera.Process();
-        render.Process(&sceneCamera);
+        sceneManager.Process();
+        render.Process(sceneManager.GetScene());
     }
 
     glfwTerminate();
