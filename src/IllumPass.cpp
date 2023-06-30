@@ -41,13 +41,14 @@ void IllumPass::execute(Scene *scene) {
         glUniform1i(textureLocation, 0);
         glUniform1f(repeatLocation, obj.textureRepeat);
 
-        // Transform matrix
+        // Transform matrix (match Unity)
         glm::mat4 modelMatrix(1.0f);
         glm::mat3 normalMatrix(1.0f);
         modelMatrix = glm::translate(modelMatrix, obj.position);
-        modelMatrix = glm::rotate(modelMatrix, obj.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-        modelMatrix = glm::rotate(modelMatrix, obj.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-        modelMatrix = glm::rotate(modelMatrix, obj.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+        // First result on Google for the docs still ask for degrees, was deprecated, was fun to find out...
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(obj.rotation.y), glm::vec3(0.0f, -1.0f, 0.0f));
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(obj.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(obj.rotation.z), glm::vec3(0.0f, 0.0f, -1.0f));
         modelMatrix = glm::scale(modelMatrix, obj.scale);
         normalMatrix = glm::inverseTranspose(glm::mat3(view*modelMatrix));
         glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));

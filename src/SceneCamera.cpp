@@ -63,7 +63,7 @@ glm::mat4 SceneCamera::GetViewMatrix() {
 }
 
 glm::mat4 SceneCamera::GetProjectionMatrix() {
-    return glm::perspective(45.0f, (float)ctx->width/ctx->height, 0.1f, 50.0f);
+    return glm::perspective(glm::radians(60.0f), (float)ctx->width/ctx->height, 0.1f, 50.0f);
 }
 
 void SceneCamera::SetPosition(const glm::vec3 &pos) {

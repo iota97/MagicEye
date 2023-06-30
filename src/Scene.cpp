@@ -25,11 +25,24 @@ void Scene::SetSkybox(const char* path) {
 }
 
 Scene1::Scene1(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w, c) {
-    textures.push_back(LoadTexture("assets/textures/UV_Grid_Sm.png"));
-    models.push_back(Model("assets/models/cube.obj"));
+	textures.push_back(LoadTexture("assets/textures/UV_Grid_Sm.png"));
+	textures.push_back(LoadTexture("assets/textures/SoilCracked.png"));
+	models.push_back(Model("assets/models/bunny_lp.obj"));
+	models.push_back(Model("assets/models/plane.obj"));
 
-    Object obj;
-    obj.model = &models[0];
-    obj.texture = textures[0];
-    objects.push_back(obj);
+	Object obj;
+	obj.model = &models[0];
+	obj.texture = textures[0];
+	obj.position = glm::vec3(0.00, 0.00, 0.00);
+	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
+	obj.scale = glm::vec3(1.00, 1.00, 1.00);
+	obj.textureRepeat = 1;
+	objects.push_back(obj);
+	obj.model = &models[1];
+	obj.texture = textures[1];
+	obj.position = glm::vec3(0.00, -2.96, 0.00);
+	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
+	obj.scale = glm::vec3(7.46, 7.46, 7.46);
+	obj.textureRepeat = 8;
+	objects.push_back(obj);
 }
