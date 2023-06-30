@@ -10,9 +10,8 @@ struct Context {
     float deltaTime;
 
     // Misc
-    int sceneId = 0;
+    int sceneId = 1;
     bool showMenu = false;
-    bool flyingCamera = true;
     bool vSync = true;
 
     // Sterogram setting

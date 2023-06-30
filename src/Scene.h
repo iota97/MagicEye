@@ -15,8 +15,11 @@ public:
     virtual void Process();
 
     SceneCamera *cam;
-    glm::vec3 lightDir;
+    glm::vec3 lightDir = glm::vec3(1.0);
+    GLfloat ambientFactor = 0.1;
+
     std::vector<Object> objects;
+
     bool hasSkybox = false;
     GLuint skybox;
 

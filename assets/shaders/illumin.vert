@@ -9,14 +9,17 @@ uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat3 normalMatrix;
 uniform vec3 lightVector;
+
 out vec3 lightDir;
 out vec3 vNormal;
 out vec2 uv;
+out vec3 vViewPosition;
 
 void main() {
-  vec4 mvPosition = viewMatrix * modelMatrix * vec4(position, 1.0);
-  vNormal = normalize(normalMatrix * normal);
-  lightDir = vec3(viewMatrix * vec4(lightVector, 0.0));
-  gl_Position = projectionMatrix * mvPosition;
-  uv = UV;
+    vec4 mvPosition = viewMatrix * modelMatrix * vec4(position, 1.0);
+    vViewPosition = -mvPosition.xyz;
+    vNormal = normalize(normalMatrix * normal);
+    lightDir = vec3(viewMatrix * vec4(lightVector, 0.0));
+    gl_Position = projectionMatrix * mvPosition;
+    uv = UV;
 }

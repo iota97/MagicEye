@@ -21,10 +21,15 @@ void IllumPass::execute(Scene *scene) {
     glUniformMatrix4fv(glGetUniformLocation(shader.Program, "projectionMatrix"), 1, GL_FALSE, glm::value_ptr(projection));
     glUniformMatrix4fv(glGetUniformLocation(shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
     glUniform3fv(glGetUniformLocation(shader.Program, "lightVector"), 1, glm::value_ptr(scene->lightDir));
-    
-    // Model uniform location
+    glUniform1f(glGetUniformLocation(shader.Program, "Ka"), scene->ambientFactor);
+
+    // Object uniform location
     GLint textureLocation = glGetUniformLocation(shader.Program, "tex");
     GLint repeatLocation = glGetUniformLocation(shader.Program, "repeat");
+    GLint specularColorLocation = glGetUniformLocation(shader.Program, "specularColor");
+    GLint shininessLocation = glGetUniformLocation(shader.Program, "shininess");
+    GLint kdLocation = glGetUniformLocation(shader.Program, "Kd");
+    GLint ksLocation = glGetUniformLocation(shader.Program, "Ks");
     GLint modelMatrixLocation = glGetUniformLocation(shader.Program, "modelMatrix");
     GLint normalMatrixLocation = glGetUniformLocation(shader.Program, "normalMatrix");
 
@@ -47,6 +52,12 @@ void IllumPass::execute(Scene *scene) {
         normalMatrix = glm::inverseTranspose(glm::mat3(view*modelMatrix));
         glUniformMatrix4fv(modelMatrixLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix));
         glUniformMatrix3fv(normalMatrixLocation, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+
+        // Material uniform
+        glUniform3fv(specularColorLocation, 1, glm::value_ptr(obj.specularColor));
+        glUniform1f(shininessLocation, obj.shininess);
+        glUniform1f(kdLocation, obj.diffuseFactor);
+        glUniform1f(ksLocation, obj.specularFactor);
         obj.model->Draw();
     }
 }

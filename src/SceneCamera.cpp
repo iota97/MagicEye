@@ -81,7 +81,6 @@ void SceneCamera::Process() {
         glfwSetWindowShouldClose(window, true);
         return;
     }
-    camera.onGround = !context->flyingCamera;
     glfwPollEvents();
     if (!context->showMenu) {
         apply_camera_movements();

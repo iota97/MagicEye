@@ -5,7 +5,12 @@ void Scene::Process() {
     cam->Process();
 }
 
-Scene::Scene(SceneCamera *sc, GLFWwindow *w, Context *c) : cam(sc), window(w), ctx(c) {}
+Scene::Scene(SceneCamera *sc, GLFWwindow *w, Context *c) : cam(sc), window(w), ctx(c) {
+    Skybox("assets/textures/cubes/skybox/");
+    lightDir = glm::normalize(glm::vec3(-1.0, 1.0, -1.8));
+    sc->SetPosition(glm::vec3(0.0f, 0.0f, 7.0f));
+    sc->SetRotation(-90, 0);
+}
 
 Scene::~Scene() {
     for (auto &t : textures) {
@@ -27,11 +32,6 @@ void Scene::Skybox(const char* path) {
 Scene1::Scene1(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w, c) {
     textures.push_back(LoadTexture("assets/textures/UV_Grid_Sm.png"));
     models.push_back(Model("assets/models/cube.obj"));
-
-    lightDir = glm::vec3(1.0, 1.0, 1.0);
-    Skybox("assets/textures/cubes/skybox/");
-    sc->SetPosition(glm::vec3(0.0f, 0.0f, 7.0f));
-    sc->SetRotation(-90, 0);
 
     Object obj;
     obj.model = &models[0];
