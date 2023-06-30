@@ -5,6 +5,7 @@
 #include "Context.h"
 #include "StereoPass.h"
 #include "IllumPass.h"
+#include "SkyboxPass.h"
 #include "ImGUI.h"
 #include "Scene.h"
 
@@ -24,6 +25,7 @@ private:
     GLuint FBO, depthMap, colorMap;
 
     IllumPass illumPass;
+    SkyboxPass skyboxPass;
     StereoPass stereoPass;
     ImGUI imGUI;
 };

@@ -64,6 +64,11 @@ void Render::Process(Scene *scene) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     illumPass.execute(scene);
 
+    // SkyboxPass
+    if (scene->hasSkybox) {
+        skyboxPass.execute(scene);
+    }
+
     // Stereogram pass
     if (ctx->stereoRendering) {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -1,9 +1,9 @@
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
 
-#include "src/Context.h"
-#include "src/SceneManager.h"
-#include "src/Render.h"
+#include "Context.h"
+#include "SceneManager.h"
+#include "Render.h"
 
 GLuint screenWidth = 1280, screenHeight = 720;
 static Context ctx;

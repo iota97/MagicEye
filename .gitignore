@@ -1,3 +1,4 @@
 magiceye
 *.o
 imgui.ini
+build/
