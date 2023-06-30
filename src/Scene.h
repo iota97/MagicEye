@@ -17,14 +17,12 @@ public:
     SceneCamera *cam;
     glm::vec3 lightDir = glm::vec3(1.0);
     GLfloat ambientFactor = 0.1;
+    GLuint skybox;
 
     std::vector<Object> objects;
 
-    bool hasSkybox = false;
-    GLuint skybox;
-
 protected:
-    void Skybox(const char* path);
+    void SetSkybox(const char* path);
     GLFWwindow *window;
     Context *ctx;
     std::vector<Model> models;

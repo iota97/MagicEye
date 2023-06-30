@@ -65,10 +65,8 @@ void Render::Process(Scene *scene) {
     illumPass.execute(scene);
 
     // SkyboxPass
-    if (scene->hasSkybox) {
-        skyboxPass.execute(scene);
-    }
-
+    skyboxPass.execute(scene);
+    
     // Stereogram pass
     if (ctx->stereoRendering) {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
