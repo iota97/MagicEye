@@ -27,7 +27,7 @@ void SceneManager::SetScene(int id) {
             scene = new Scene(&cam, window, ctx);
             break;
         case 1:
-            scene = new Scene1(&cam, window, ctx);
+            scene = new SceneFairyHouse(&cam, window, ctx);
             break;
     }
 }

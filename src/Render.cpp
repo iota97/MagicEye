@@ -33,6 +33,11 @@ Render::Render(GLFWwindow *w, Context *c) : ctx(c), window(w), illumPass(ctx), s
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorMap, 0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // Set face culling
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);  
 }
 
 Render::~Render() {

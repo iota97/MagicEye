@@ -32,7 +32,7 @@ const GLfloat YAW        = -90.0f; //Y
 const GLfloat PITCH      =  0.0f; //X
 
 // speed of camera movement
-const GLfloat SPEED      =  3.0f;
+const GLfloat SPEED      =  10.0f;
 // speed compensation in case of diagonal camera movement (= 1/sqrt(2))
 const GLfloat DIAGONAL_COMPENSATION = 0.70710678f;
 // parameter to weight mouse movement

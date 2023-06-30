@@ -185,7 +185,6 @@ private:
             }
             else{
                 vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-                std::cout << "WARNING::ASSIMP:: MODEL WITHOUT UV COORDINATES -> TANGENT AND BITANGENT ARE = 0" << std::endl;
             }
             // we add the vertex to the list
             vertices.emplace_back(vertex);

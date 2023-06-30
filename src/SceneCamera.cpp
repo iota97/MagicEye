@@ -1,4 +1,5 @@
 #include "SceneCamera.h"
+#include <cstdio>
 
 static bool keys[1024];
 static float lastX, lastY;
@@ -63,7 +64,7 @@ glm::mat4 SceneCamera::GetViewMatrix() {
 }
 
 glm::mat4 SceneCamera::GetProjectionMatrix() {
-    return glm::perspective(glm::radians(60.0f), (float)ctx->width/ctx->height, 0.1f, 50.0f);
+    return glm::perspective(glm::radians(60.0f), (float)ctx->width/ctx->height, 0.5f, 500.0f);
 }
 
 void SceneCamera::SetPosition(const glm::vec3 &pos) {
@@ -77,6 +78,7 @@ void SceneCamera::SetRotation(GLfloat yaw, GLfloat pitch) {
 }
 
 void SceneCamera::Process() {
+    //printf("Camera pos: (%f, %f, %f), rot: (%f, %f)\n", camera.Position.x, camera.Position.y, camera.Position.z, camera.Yaw, camera.Pitch);
     if (context->shouldClose) {
         glfwSetWindowShouldClose(window, true);
         return;

@@ -10,7 +10,7 @@ struct Context {
     float deltaTime;
 
     // Misc
-    int sceneId = 1;
+    int sceneId = 0;
     bool showMenu = false;
     bool vSync = true;
 

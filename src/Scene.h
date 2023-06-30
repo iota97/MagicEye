@@ -29,7 +29,7 @@ protected:
     std::vector<GLuint> textures;
 };
 
-class Scene1 : public Scene {
+class SceneFairyHouse : public Scene {
 public:
-    Scene1(SceneCamera *sc, GLFWwindow *w, Context *c);
+    SceneFairyHouse(SceneCamera *sc, GLFWwindow *w, Context *c);
 };
