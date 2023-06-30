@@ -14,5 +14,5 @@ public:
 
 private:
     Shader shader;
-    Model cube;
+    Model model;
 };

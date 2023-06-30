@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-SkyboxPass::SkyboxPass() : shader("assets/shaders/skybox.vert", "assets/shaders/skybox.frag"), cube("assets/models/cube.obj") {}
+SkyboxPass::SkyboxPass() : shader("assets/shaders/skybox.vert", "assets/shaders/skybox.frag"), model("assets/models/skybox.obj") {}
 
 SkyboxPass::~SkyboxPass() {
     shader.Delete();
@@ -26,6 +26,6 @@ void SkyboxPass::execute(Scene *scene) {
     glUniformMatrix4fv(glGetUniformLocation(shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
     
     // Draw
-    cube.Draw();
+    model.Draw();
     glDepthFunc(GL_LESS);
 }
