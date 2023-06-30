@@ -1,10 +1,10 @@
-#include "ImGUI.h"
+#include "GUI.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
-ImGUI::ImGUI(GLFWwindow *w, Context *c) : ctx(c) {
+GUI::GUI(GLFWwindow *w, Context *c) : ctx(c) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -16,13 +16,13 @@ ImGUI::ImGUI(GLFWwindow *w, Context *c) : ctx(c) {
     ImGui_ImplOpenGL3_Init("#version 430");
 }
 
-ImGUI::~ImGUI() {
+GUI::~GUI() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 }
 
-void ImGUI::RenderMenu() {
+void GUI::RenderMenu() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();

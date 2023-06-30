@@ -6,7 +6,7 @@ void framebuffer_size_callback(GLFWwindow* window, int w, int h) {
     context->height = h;
 }
 
-Render::Render(GLFWwindow *w, Context *c) : ctx(c), window(w), illumPass(ctx), stereoPass(ctx), imGUI(window, ctx) {
+Render::Render(GLFWwindow *w, Context *c) : ctx(c), window(w), illumPass(ctx), stereoPass(ctx), gui(window, ctx) {
     context = ctx;
     // Size and resize support
     glfwGetFramebufferSize(window, &ctx->width, &ctx->height);
@@ -75,7 +75,7 @@ void Render::Process(Scene *scene) {
 
     // UI
     if (ctx->showMenu) {
-        imGUI.RenderMenu();
+        gui.RenderMenu();
     }
 
     // Swap buffer

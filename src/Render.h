@@ -6,7 +6,7 @@
 #include "StereoPass.h"
 #include "IllumPass.h"
 #include "SkyboxPass.h"
-#include "ImGUI.h"
+#include "GUI.h"
 #include "Scene.h"
 
 class Render {
@@ -27,5 +27,5 @@ private:
     IllumPass illumPass;
     SkyboxPass skyboxPass;
     StereoPass stereoPass;
-    ImGUI imGUI;
+    GUI gui;
 };

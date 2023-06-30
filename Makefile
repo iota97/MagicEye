@@ -10,7 +10,7 @@ IMGUI_HEADER = ./ext/imgui/imconfig.h ./ext/imgui/imgui_internal.h ./ext/imgui/i
 
 OBJ = $(BUILDIR)/main.o $(BUILDIR)/image.o $(BUILDIR)/glad.o $(BUILDIR)/imgui.o $(BUILDIR)/imgui_draw.o \
 	$(BUILDIR)/imgui_tables.o $(BUILDIR)/imgui_widgets.o $(BUILDIR)/imgui_impl_opengl3.o $(BUILDIR)/imgui_impl_glfw.o \
-	$(BUILDIR)/StereoPass.o $(BUILDIR)/ImGUI.o $(BUILDIR)/SceneCamera.o $(BUILDIR)/IllumPass.o $(BUILDIR)/Render.o\
+	$(BUILDIR)/StereoPass.o $(BUILDIR)/GUI.o $(BUILDIR)/SceneCamera.o $(BUILDIR)/IllumPass.o $(BUILDIR)/Render.o\
 	$(BUILDIR)/Scene.o $(BUILDIR)/SceneManager.o $(BUILDIR)/SkyboxPass.o
 
 magiceye: $(OBJ) 
@@ -44,8 +44,8 @@ $(BUILDIR)/SceneCamera.o: ./src/SceneCamera.cpp ./src/SceneCamera.h ./src/Contex
 $(BUILDIR)/StereoPass.o: ./src/StereoPass.cpp ./src/StereoPass.h ./src/Context.h
 	$(CXX) $(CXXFLAGS) -c ./src/StereoPass.cpp -o $(BUILDIR)/StereoPass.o
 
-$(BUILDIR)/ImGUI.o: ./src/ImGUI.cpp ./src/ImGUI.h ./src/Context.h $(IMGUI_HEADER)
-	$(CXX) $(CXXFLAGS) -c ./src/ImGUI.cpp -o $(BUILDIR)/ImGUI.o
+$(BUILDIR)/GUI.o: ./src/GUI.cpp ./src/GUI.h ./src/Context.h $(IMGUI_HEADER)
+	$(CXX) $(CXXFLAGS) -c ./src/GUI.cpp -o $(BUILDIR)/GUI.o
 
 $(BUILDIR)/image.o: ./ext/utils/image.h ./ext/utils/image.cpp ./ext/stb_image/stb_image.h ./ext/utils/image.h
 	$(CXX) $(CXXFLAGS) -c ./ext/utils/image.cpp -o $(BUILDIR)/image.o

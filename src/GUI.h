@@ -2,10 +2,10 @@
 #include <GLFW/glfw3.h>
 #include "Context.h"
 
-class ImGUI {
+class GUI {
 public:
-    ImGUI(GLFWwindow *w, Context *c);
-    ~ImGUI();
+    GUI(GLFWwindow *w, Context *c);
+    ~GUI();
 
     void RenderMenu();
 private:
