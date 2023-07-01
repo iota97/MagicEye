@@ -49,8 +49,8 @@ void GUI::RenderMenu() {
 
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
     ImGui::SliderFloat("Depth strength", &ctx->depthStrength, 0.5f, 20.0f, "%.1f");
-    ImGui::SliderFloat("Eye separation", &ctx->eyeSep, 0.1f, 2.0f, "%.1f");
-    ImGui::SliderFloat("Observer distance", &ctx->obsDistance, 0.1f, 5.0f, "%.1f");
+    ImGui::SliderFloat("Eye separation", &ctx->eyeSep, 0.1f, 2.0f, "%.2f");
+    ImGui::SliderFloat("Observer distance", &ctx->obsDistance, 0.1f, 5.0f, "%.2f");
 
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
     ImGui::SliderFloat("Scene color", &ctx->sceneColorStr, 0.0f, 1.0f, "%.1f");
