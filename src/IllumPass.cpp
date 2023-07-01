@@ -45,7 +45,6 @@ void IllumPass::execute(Scene *scene) {
         glm::mat4 modelMatrix(1.0f);
         glm::mat3 normalMatrix(1.0f);
         modelMatrix = glm::translate(modelMatrix, obj.position);
-        // First result on Google for the docs still ask for degrees, was deprecated, was fun to find out...
         modelMatrix = glm::rotate(modelMatrix, glm::radians(obj.rotation.y), glm::vec3(0.0f, -1.0f, 0.0f));
         modelMatrix = glm::rotate(modelMatrix, glm::radians(obj.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
         modelMatrix = glm::rotate(modelMatrix, glm::radians(obj.rotation.z), glm::vec3(0.0f, 0.0f, -1.0f));

@@ -39,5 +39,8 @@ void SceneManager::SetScene(int id) {
         case 4:
             scene = new SceneWindmill(&cam, window, ctx);
             break;
+        case 5:
+            scene = new SceneSpace(&cam, window, ctx);
+            break;
     }
 }

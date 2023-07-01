@@ -25,8 +25,8 @@ void Scene::SetSkybox(const char* path) {
 }
 
 SceneStandard::SceneStandard(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w, c) {
-	sc->SetPosition(glm::vec3(18.408304, 10.016317, -36.310455));
-    sc->SetRotation(44.750000, -13.250000);
+	sc->SetPosition(glm::vec3(-36.619953, 11.382235, -37.909637));
+	sc->SetRotation(39.250000, -21.250000);
 
 	textures.push_back(LoadTexture("assets/textures/white.png"));
 	models.push_back(Model("assets/models/bunny.obj"));
@@ -43,14 +43,14 @@ SceneStandard::SceneStandard(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene
 	objects.push_back(obj);
 	obj.model = &models[1];
 	obj.texture = textures[0];
-	obj.position = glm::vec3(-26.07, -3.94, -23.51);
+	obj.position = glm::vec3(26.07, -3.94, -23.51);
 	obj.rotation = glm::vec3(0.00, 251.06, 0.00);
 	obj.scale = glm::vec3(2.54, 2.54, 2.54);
 	obj.textureRepeat = 1;
 	objects.push_back(obj);
 	obj.model = &models[2];
 	obj.texture = textures[0];
-	obj.position = glm::vec3(28.37, -7.70, -22.26);
+	obj.position = glm::vec3(-28.37, -7.70, -22.26);
 	obj.rotation = glm::vec3(0.00, 107.19, 0.00);
 	obj.scale = glm::vec3(0.89, 0.89, 0.89);
 	obj.textureRepeat = 1;
@@ -237,4 +237,67 @@ SceneWindmill::SceneWindmill(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene
 void SceneWindmill::Process() {
 	Scene::Process();
 	objects[0].rotation.x += 10.0 * ctx->deltaTime;
+}
+
+SceneSpace::SceneSpace(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w, c) {
+	sc->SetPosition(glm::vec3(3.900593, 2.222718, -12.913857));
+    sc->SetRotation(142.750000, -11.750000);
+
+	lightDir = glm::vec3(-0.693408, 0.402747, -0.597478);
+	SetSkybox("assets/textures/cubes/space/");
+
+	textures.push_back(LoadTexture("assets/textures/tie_aile.jpg"));
+	textures.push_back(LoadTexture("assets/textures/tie_sphere.jpg"));
+	textures.push_back(LoadTexture("assets/textures/tie_attach.jpg"));
+	textures.push_back(LoadTexture("assets/textures/lambert1_baseColor.jpeg"));
+	models.push_back(Model("assets/models/tie0.obj"));
+	models.push_back(Model("assets/models/tie1.obj"));
+	models.push_back(Model("assets/models/tie2.obj"));
+	models.push_back(Model("assets/models/tie3.obj"));
+	models.push_back(Model("assets/models/tie4.obj"));
+	models.push_back(Model("assets/models/xwing.obj"));
+
+	Object obj;
+	obj.model = &models[0];
+	obj.texture = textures[0];
+	obj.position = glm::vec3(41.20, -4.71, -15.58);
+	obj.rotation = glm::vec3(343.61, 260.89, 5.68);
+	obj.scale = glm::vec3(2.29, 2.29, 2.29);
+	obj.textureRepeat = 1;
+	objects.push_back(obj);
+	obj.model = &models[1];
+	obj.texture = textures[1];
+	obj.position = glm::vec3(41.20, -4.71, -15.58);
+	obj.rotation = glm::vec3(343.61, 260.89, 5.68);
+	obj.scale = glm::vec3(2.29, 2.29, 2.29);
+	obj.textureRepeat = 1;
+	objects.push_back(obj);
+	obj.model = &models[2];
+	obj.texture = textures[2];
+	obj.position = glm::vec3(41.20, -4.71, -15.58);
+	obj.rotation = glm::vec3(343.61, 260.89, 5.68);
+	obj.scale = glm::vec3(2.29, 2.29, 2.29);
+	obj.textureRepeat = 1;
+	objects.push_back(obj);
+	obj.model = &models[3];
+	obj.texture = textures[2];
+	obj.position = glm::vec3(41.20, -4.71, -15.58);
+	obj.rotation = glm::vec3(343.61, 260.89, 5.68);
+	obj.scale = glm::vec3(2.29, 2.29, 2.29);
+	obj.textureRepeat = 1;
+	objects.push_back(obj);
+	obj.model = &models[4];
+	obj.texture = textures[0];
+	obj.position = glm::vec3(41.20, -4.71, -15.58);
+	obj.rotation = glm::vec3(343.61, 260.89, 5.68);
+	obj.scale = glm::vec3(2.29, 2.29, 2.29);
+	obj.textureRepeat = 1;
+	objects.push_back(obj);
+	obj.model = &models[5];
+	obj.texture = textures[3];
+	obj.position = glm::vec3(-12.94, -8.33, -1.46);
+	obj.rotation = glm::vec3(7.82, 262.24, 358.54);
+	obj.scale = glm::vec3(97.67, 97.67, 97.67);
+	obj.textureRepeat = 1;
+	objects.push_back(obj);
 }

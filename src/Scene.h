@@ -54,3 +54,8 @@ public:
     SceneWindmill(SceneCamera *sc, GLFWwindow *w, Context *c);
     void Process() override;
 };
+
+class SceneSpace : public Scene {
+public:
+    SceneSpace(SceneCamera *sc, GLFWwindow *w, Context *c);
+};
