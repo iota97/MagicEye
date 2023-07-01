@@ -78,7 +78,11 @@ void SceneCamera::SetRotation(GLfloat yaw, GLfloat pitch) {
 }
 
 void SceneCamera::Process() {
-    //printf("Camera pos: (%f, %f, %f), rot: (%f, %f)\n", camera.Position.x, camera.Position.y, camera.Position.z, camera.Yaw, camera.Pitch);
+    #if 0
+    printf("Camera pos: (%f, %f, %f), rot: (%f, %f), front: (%f, %f, %f)\n",
+        camera.Position.x, camera.Position.y, camera.Position.z, camera.Yaw, camera.Pitch,
+        camera.Front.x, camera.Front.y, camera.Front.z);
+    #endif
     if (context->shouldClose) {
         glfwSetWindowShouldClose(window, true);
         return;

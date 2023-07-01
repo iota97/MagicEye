@@ -1,0 +1,15 @@
+Make by Giovanni Cocco for the Real time graphic programming course at UniMi.
+Some utils code was borrowed from the lesson made by professor Davide Gadia.
+
+Assets credits:
+
+House:
+This work is based on "Ftm" (https://sketchfab.com/3d-models/ftm-0970f30574d047b1976ba0aa6f2ef855) by luyssport (https://sketchfab.com/luyssport) licensed under CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+This work is based on "FREE - SkyBox Anime Sky" (https://sketchfab.com/3d-models/free-skybox-anime-sky-56a60c1d1e8b44eabff138374f996d8f) by Paul (https://sketchfab.com/paul_paul_paul) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+
+Church:
+This work is based on "St Dunstan In The West Interior" (https://sketchfab.com/3d-models/st-dunstan-in-the-west-interior-0224645af27441d788ace5294b1e9a0f) by artfletch (https://sketchfab.com/artfletch) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+
+Fight:
+This work is based on "Dreamsong" (https://sketchfab.com/3d-models/dreamsong-a75fc814ebd545e1b4b29894646f1f26) by Kampfisken (https://sketchfab.com/kampfisken) licensed under CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)
+This work is based on "Fantasy Sky Background" (https://sketchfab.com/3d-models/fantasy-sky-background-15c79bb2fc1147128039fe4ff90fd5a0) by Hannes Delbeke (https://sketchfab.com/han) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

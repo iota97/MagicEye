@@ -21,7 +21,7 @@ struct Context {
     float obsDistance = 1.8;
     float sceneColorStr = 0.7;
     float edgeStr = 0.4;
-    float edgeThreshold = 0.5;
+    float edgeThreshold = 1.0;
     bool staticPattern = true;
     int pattern = 5;
 };

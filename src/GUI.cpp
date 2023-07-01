@@ -36,7 +36,7 @@ void GUI::RenderMenu() {
     if (ImGui::Button("Quit")) {
         ctx->shouldClose = true;
     }
-    const char* scene[] = {"Void", "Fairy house"};
+    const char* scene[] = {"Void", "Fairy house", "Church", "Fight"};
     ImGui::Combo("Scene", &ctx->sceneId, scene, IM_ARRAYSIZE(scene));
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
@@ -52,7 +52,7 @@ void GUI::RenderMenu() {
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
     ImGui::SliderFloat("Scene color", &ctx->sceneColorStr, 0.0f, 1.0f, "%.1f");
     ImGui::SliderFloat("Edge strength", &ctx->edgeStr, 0.0f, 1.0f, "%.1f");
-    ImGui::SliderFloat("Edge threshold", &ctx->edgeThreshold, 0.0f, 2.0f, "%.2f");
+    ImGui::SliderFloat("Edge threshold", &ctx->edgeThreshold, 0.0f, 3.0f, "%.2f");
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
     const char* pattern[] = {"Perlin noise", "Perlin noise (RGB)", "RGB noise", "Colorful", "Cubes", "Symbols", "Wavy"};

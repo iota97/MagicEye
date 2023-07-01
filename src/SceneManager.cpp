@@ -29,5 +29,11 @@ void SceneManager::SetScene(int id) {
         case 1:
             scene = new SceneFairyHouse(&cam, window, ctx);
             break;
+        case 2:
+            scene = new SceneChurch(&cam, window, ctx);
+            break;
+        case 3:
+            scene = new SceneFight(&cam, window, ctx);
+            break;
     }
 }

@@ -6,7 +6,7 @@ void Scene::Process() {
 }
 
 Scene::Scene(SceneCamera *sc, GLFWwindow *w, Context *c) : cam(sc), window(w), ctx(c) {
-    lightDir = glm::normalize(glm::vec3(-1.0, 1.0, -1.8));
+    lightDir = glm::vec3(-0.376533, 0.484810, -0.789419);
     skybox = LoadTextureCube("assets/textures/cubes/skybox/");
     sc->SetPosition(glm::vec3(0.0f, 0.0f, -7.0f));
     sc->SetRotation(90, 0);
@@ -27,6 +27,9 @@ void Scene::SetSkybox(const char* path) {
 SceneFairyHouse::SceneFairyHouse(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w, c) {
     sc->SetPosition(glm::vec3(14.605305, -2.974416, -29.658712));
     sc->SetRotation(471.5, 2.25);
+
+	lightDir = glm::vec3(-0.435924, 0.876727, -0.203274);
+	SetSkybox("assets/textures/cubes/anime/");
 
 	textures.push_back(LoadTexture("assets/textures/ground_baseColor.jpeg"));
 	textures.push_back(LoadTexture("assets/textures/piedras_baseColor.jpeg"));
@@ -114,6 +117,53 @@ SceneFairyHouse::SceneFairyHouse(SceneCamera *sc, GLFWwindow *w, Context *c) : S
 	obj.position = glm::vec3(-0.31, 0.53, 0.37);
 	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
 	obj.scale = glm::vec3(3.73, 3.73, 3.73);
+	obj.textureRepeat = 1;
+	objects.push_back(obj);
+}
+
+SceneChurch::SceneChurch(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w, c) {
+	sc->SetPosition(glm::vec3(-0.825525, 11.907833, 0.286204));
+    sc->SetRotation(-51.750000, -8.750000);
+	lightDir = glm::vec3(0.435924, 0.876727, 0.203274);
+	
+	textures.push_back(LoadTexture("assets/textures/StDunstanInTheWest01_Model_5_u1_v1_baseColor.jpeg"));
+	models.push_back(Model("assets/models/church.obj"));
+
+	Object obj;
+	obj.model = &models[0];
+	obj.specularFactor = 0.2;
+	obj.texture = textures[0];
+	obj.scale = glm::vec3(3);
+	objects.push_back(obj);
+}
+
+SceneFight::SceneFight(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w, c) {
+	sc->SetPosition(glm::vec3	(-29.035936, 85.732651, 53.747051));
+    sc->SetRotation(302.250000, -25.000000);
+
+	lightDir = glm::vec3(-0.940326, -0.254602, 0.225752);
+	SetSkybox("assets/textures/cubes/fantasy/");
+
+	textures.push_back(LoadTexture("assets/textures/Bake_Bridge_baseColor.png"));
+	textures.push_back(LoadTexture("assets/textures/Bake_Blood_baseColor.png"));
+	models.push_back(Model("assets/models/fight0.obj"));
+	models.push_back(Model("assets/models/fight1.obj"));
+
+	Object obj;
+	obj.model = &models[0];
+	obj.texture = textures[0];
+	obj.position = glm::vec3(-1.14, 1.03, 2.50);
+	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
+	obj.scale = glm::vec3(0.4);
+	obj.textureRepeat = 1;
+	obj.shininess = 200;
+	obj.specularFactor = 0.9;
+	objects.push_back(obj);
+	obj.model = &models[1];
+	obj.texture = textures[1];
+	obj.position = glm::vec3(-1.14, 1.03, 2.50);
+	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
+	obj.scale = glm::vec3(0.4);
 	obj.textureRepeat = 1;
 	objects.push_back(obj);
 }

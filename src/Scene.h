@@ -33,3 +33,13 @@ class SceneFairyHouse : public Scene {
 public:
     SceneFairyHouse(SceneCamera *sc, GLFWwindow *w, Context *c);
 };
+
+class SceneChurch : public Scene {
+public:
+    SceneChurch(SceneCamera *sc, GLFWwindow *w, Context *c);
+};
+
+class SceneFight : public Scene {
+public:
+    SceneFight(SceneCamera *sc, GLFWwindow *w, Context *c);
+};
