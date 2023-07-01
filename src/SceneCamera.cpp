@@ -87,6 +87,8 @@ void SceneCamera::Process() {
         glfwSetWindowShouldClose(window, true);
         return;
     }
+    camera.MovementSpeed = ctx->moveSpeed;
+    camera.MouseSensitivity = ctx->mouseSensitivity;
     glfwPollEvents();
     if (!context->showMenu) {
         apply_camera_movements();

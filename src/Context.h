@@ -13,6 +13,8 @@ struct Context {
     int sceneId = 0;
     bool showMenu = false;
     bool vSync = true;
+    float moveSpeed = 15.0f;
+    float mouseSensitivity = 0.25f;
 
     // Sterogram setting
     bool stereoRendering = false;
