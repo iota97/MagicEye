@@ -36,8 +36,9 @@ void GUI::RenderMenu() {
     if (ImGui::Button("Quit")) {
         ctx->shouldClose = true;
     }
-    const char* scene[] = {"Void", "Fairy house", "Church", "Fight", "Windmill"};
+    const char* scene[] = {"Standard", "Fairy house", "Church", "Fight", "Windmill"};
     ImGui::Combo("Scene", &ctx->sceneId, scene, IM_ARRAYSIZE(scene));
+    ImGui::Dummy(ImVec2(0.0f, 10.0f));
     ImGui::SliderFloat("Movement speed", &ctx->moveSpeed, 1.0f, 100.0f, "%.1f");
     ImGui::SliderFloat("Mouse sensitivity", &ctx->mouseSensitivity, 0.05f, 2.0f, "%.2f");
     ImGui::Dummy(ImVec2(0.0f, 10.0f));

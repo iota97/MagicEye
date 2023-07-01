@@ -24,6 +24,39 @@ void Scene::SetSkybox(const char* path) {
     skybox = LoadTextureCube(path);
 }
 
+SceneStandard::SceneStandard(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w, c) {
+	sc->SetPosition(glm::vec3(18.408304, 10.016317, -36.310455));
+    sc->SetRotation(44.750000, -13.250000);
+
+	textures.push_back(LoadTexture("assets/textures/white.png"));
+	models.push_back(Model("assets/models/bunny.obj"));
+	models.push_back(Model("assets/models/teapot.obj"));
+	models.push_back(Model("assets/models/dragon.obj"));
+
+	Object obj;
+	obj.model = &models[0];
+	obj.texture = textures[0];
+	obj.position = glm::vec3(-0.31, -5.44, -11.62);
+	obj.rotation = glm::vec3(0.00, 180.39, 0.00);
+	obj.scale = glm::vec3(76.25, 76.25, 76.25);
+	obj.textureRepeat = 1;
+	objects.push_back(obj);
+	obj.model = &models[1];
+	obj.texture = textures[0];
+	obj.position = glm::vec3(-26.07, -3.94, -23.51);
+	obj.rotation = glm::vec3(0.00, 251.06, 0.00);
+	obj.scale = glm::vec3(2.54, 2.54, 2.54);
+	obj.textureRepeat = 1;
+	objects.push_back(obj);
+	obj.model = &models[2];
+	obj.texture = textures[0];
+	obj.position = glm::vec3(28.37, -7.70, -22.26);
+	obj.rotation = glm::vec3(0.00, 107.19, 0.00);
+	obj.scale = glm::vec3(0.89, 0.89, 0.89);
+	obj.textureRepeat = 1;
+	objects.push_back(obj);
+}
+
 SceneFairyHouse::SceneFairyHouse(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w, c) {
     sc->SetPosition(glm::vec3(14.605305, -2.974416, -29.658712));
     sc->SetRotation(471.5, 2.25);
