@@ -13,3 +13,6 @@ This work is based on "St Dunstan In The West Interior" (https://sketchfab.com/3
 Fight:
 This work is based on "Dreamsong" (https://sketchfab.com/3d-models/dreamsong-a75fc814ebd545e1b4b29894646f1f26) by Kampfisken (https://sketchfab.com/kampfisken) licensed under CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)
 This work is based on "Fantasy Sky Background" (https://sketchfab.com/3d-models/fantasy-sky-background-15c79bb2fc1147128039fe4ff90fd5a0) by Hannes Delbeke (https://sketchfab.com/han) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+
+Windmill:
+This work is based on "Windmill (game ready)" (https://sketchfab.com/3d-models/windmill-game-ready-6a006afce57a447baa60c7a6791f0086) by LamedeFeu (https://sketchfab.com/lamedefeu) licensed under CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)

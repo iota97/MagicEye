@@ -138,7 +138,7 @@ SceneChurch::SceneChurch(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc,
 }
 
 SceneFight::SceneFight(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w, c) {
-	sc->SetPosition(glm::vec3	(-29.035936, 85.732651, 53.747051));
+	sc->SetPosition(glm::vec3(-29.035936, 85.732651, 53.747051));
     sc->SetRotation(302.250000, -25.000000);
 
 	lightDir = glm::vec3(-0.940326, -0.254602, 0.225752);
@@ -166,4 +166,42 @@ SceneFight::SceneFight(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w
 	obj.scale = glm::vec3(0.4);
 	obj.textureRepeat = 1;
 	objects.push_back(obj);
+}
+
+SceneWindmill::SceneWindmill(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w, c) {
+	sc->SetPosition(glm::vec3(11.345096, 0.781114, -6.353123));
+    sc->SetRotation(161.500000, -3.000000);
+	
+	textures.push_back(LoadTexture("assets/textures/standardSurface1_baseColor.png"));
+	models.push_back(Model("assets/models/windmill0.obj"));
+	models.push_back(Model("assets/models/windmill1.obj"));
+	models.push_back(Model("assets/models/windmill2.obj"));
+
+	Object obj;
+	obj.model = &models[0];
+	obj.texture = textures[0];
+	obj.position = glm::vec3(-0.31, 0.53, 0.37);
+	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
+	obj.scale = glm::vec3(2.35, 2.24, 2.35);
+	obj.textureRepeat = 1;
+	objects.push_back(obj);
+	obj.model = &models[1];
+	obj.texture = textures[0];
+	obj.position = glm::vec3(-0.31, 0.53, 0.37);
+	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
+	obj.scale = glm::vec3(2.35, 2.24, 2.35);
+	obj.textureRepeat = 1;
+	objects.push_back(obj);
+	obj.model = &models[2];
+	obj.texture = textures[0];
+	obj.position = glm::vec3(-0.31, 1.11, 0.37);
+	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
+	obj.scale = glm::vec3(2.35, 2.50, 2.35);
+	obj.textureRepeat = 1;
+	objects.push_back(obj);
+}
+
+void SceneWindmill::Process() {
+	Scene::Process();
+	objects[0].rotation.x += 10.0 * ctx->deltaTime;
 }

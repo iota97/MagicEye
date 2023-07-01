@@ -43,3 +43,9 @@ class SceneFight : public Scene {
 public:
     SceneFight(SceneCamera *sc, GLFWwindow *w, Context *c);
 };
+
+class SceneWindmill : public Scene {
+public:
+    SceneWindmill(SceneCamera *sc, GLFWwindow *w, Context *c);
+    void Process() override;
+};
