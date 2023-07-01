@@ -2,6 +2,7 @@
 
 #include "Context.h"
 #include "Scene.h"
+#include "LoadingScreen.h"
 #include <GLFW/glfw3.h>
 
 class SceneManager {
@@ -20,4 +21,5 @@ private:
     GLFWwindow *window;
     Context *ctx;
     SceneCamera cam;
+    LoadingScreen loadingScreen;
 };

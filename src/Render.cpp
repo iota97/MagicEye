@@ -12,10 +12,6 @@ Render::Render(GLFWwindow *w, Context *c) : ctx(c), window(w), illumPass(ctx), s
     glfwGetFramebufferSize(window, &ctx->width, &ctx->height);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    // Misc setting
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(0.26f, 0.46f, 0.98f, 1.0f);
-
     // Create FBO
     glGenFramebuffers(1, &FBO);
 
@@ -34,7 +30,8 @@ Render::Render(GLFWwindow *w, Context *c) : ctx(c), window(w), illumPass(ctx), s
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    // Set face culling
+    // Misc settings
+    glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);  

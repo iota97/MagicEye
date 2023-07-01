@@ -11,7 +11,7 @@ IMGUI_HEADER = ./ext/imgui/imconfig.h ./ext/imgui/imgui_internal.h ./ext/imgui/i
 OBJ = $(BUILDIR)/main.o $(BUILDIR)/image.o $(BUILDIR)/glad.o $(BUILDIR)/imgui.o $(BUILDIR)/imgui_draw.o \
 	$(BUILDIR)/imgui_tables.o $(BUILDIR)/imgui_widgets.o $(BUILDIR)/imgui_impl_opengl3.o $(BUILDIR)/imgui_impl_glfw.o \
 	$(BUILDIR)/StereoPass.o $(BUILDIR)/GUI.o $(BUILDIR)/SceneCamera.o $(BUILDIR)/IllumPass.o $(BUILDIR)/Render.o\
-	$(BUILDIR)/Scene.o $(BUILDIR)/SceneManager.o $(BUILDIR)/SkyboxPass.o
+	$(BUILDIR)/Scene.o $(BUILDIR)/SceneManager.o $(BUILDIR)/SkyboxPass.o $(BUILDIR)/LoadingScreen.o
 
 magiceye: $(OBJ) 
 	$(CXX) -o $(TARGET) $(OBJ) $(LDFLAGS)
@@ -25,6 +25,9 @@ $(BUILDIR)/main.o: ./src/main.cpp ./src/Context.h ./src/Scene.h ./src/Render.h
 
 $(BUILDIR)/SkyboxPass.o: ./src/SkyboxPass.cpp ./src/SkyboxPass.h
 	$(CXX) $(CXXFLAGS) -c ./src/SkyboxPass.cpp -o $(BUILDIR)/SkyboxPass.o
+
+$(BUILDIR)/LoadingScreen.o: ./src/LoadingScreen.cpp ./src/LoadingScreen.h
+	$(CXX) $(CXXFLAGS) -c ./src/LoadingScreen.cpp -o $(BUILDIR)/LoadingScreen.o
 
 $(BUILDIR)/SceneManager.o: ./src/SceneManager.cpp ./src/SceneManager.h ./src/Scene.h
 	$(CXX) $(CXXFLAGS) -c ./src/SceneManager.cpp -o $(BUILDIR)/SceneManager.o

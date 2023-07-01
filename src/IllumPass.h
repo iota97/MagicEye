@@ -1,7 +1,6 @@
 #pragma once
 
 #include "glad/glad.h"
-
 #include "utils/shader.h"
 #include "Context.h"
 #include "Scene.h"

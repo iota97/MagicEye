@@ -21,6 +21,7 @@ Scene *SceneManager::GetScene() {
 
 void SceneManager::SetScene(int id) {
     sceneId = id;
+    loadingScreen.Draw(window, ctx);
     delete scene;
     switch(id) {
         case 0:

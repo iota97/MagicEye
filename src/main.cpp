@@ -15,6 +15,7 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+    glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
 
     GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "MagicEye", nullptr, nullptr);
     if (!window) {
@@ -33,9 +34,14 @@ int main() {
     SceneManager sceneManager(window, &ctx);
     Render render(window, &ctx);
 
+    bool firstFrame = true;
     while (!glfwWindowShouldClose(window)) {
         sceneManager.Process();
         render.Process(sceneManager.GetScene());
+        if (firstFrame) {
+            glfwShowWindow(window);
+            firstFrame = false;
+        }
     }
 
     glfwTerminate();
