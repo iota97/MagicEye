@@ -9,7 +9,7 @@ SkyboxPass::~SkyboxPass() {
     shader.Delete();
 }
 
-void SkyboxPass::execute(Scene *scene) {
+void SkyboxPass::execute(Scene *scene, Context *ctx) {
     shader.Use();
     glDepthFunc(GL_LEQUAL);
 
@@ -17,6 +17,7 @@ void SkyboxPass::execute(Scene *scene) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, scene->skybox);
     glUniform1i(glGetUniformLocation(shader.Program, "cubemap"), 0);
+    glUniform1f(glGetUniformLocation(shader.Program, "colorResolution"), ctx->colorResolution);
 
     // Matrix
     glm::mat4 projection = scene->cam->GetProjectionMatrix();

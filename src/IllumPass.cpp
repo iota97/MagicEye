@@ -15,6 +15,14 @@ IllumPass::~IllumPass() {
 void IllumPass::execute(Scene *scene) {
     shader.Use();
 
+    // Select illum model
+    GLsizei n;
+    glGetProgramStageiv(shader.Program, GL_FRAGMENT_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS, &n);
+    GLuint index[n];
+    GLint computePassLocation = glGetSubroutineUniformLocation(shader.Program, GL_FRAGMENT_SHADER, "illumModel");
+    index[computePassLocation] = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, ctx->toon ? "toon" : "phong");
+    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, n, index);
+
     // Camera setup
     glm::mat4 projection = scene->cam->GetProjectionMatrix();
     glm::mat4 view = scene->cam->GetViewMatrix();
@@ -22,6 +30,7 @@ void IllumPass::execute(Scene *scene) {
     glUniformMatrix4fv(glGetUniformLocation(shader.Program, "viewMatrix"), 1, GL_FALSE, glm::value_ptr(view));
     glUniform3fv(glGetUniformLocation(shader.Program, "lightVector"), 1, glm::value_ptr(scene->lightDir));
     glUniform1f(glGetUniformLocation(shader.Program, "Ka"), scene->ambientFactor);
+    glUniform1f(glGetUniformLocation(shader.Program, "colorResolution"), ctx->colorResolution);
 
     // Object uniform location
     GLint textureLocation = glGetUniformLocation(shader.Program, "tex");

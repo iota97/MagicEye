@@ -10,7 +10,7 @@ public:
     SkyboxPass();
     ~SkyboxPass();
 
-    void execute(Scene *scene);
+    void execute(Scene *scene, Context *ctx);
 
 private:
     Shader shader;

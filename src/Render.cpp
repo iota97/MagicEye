@@ -67,7 +67,7 @@ void Render::Process(Scene *scene) {
     illumPass.execute(scene);
 
     // SkyboxPass
-    skyboxPass.execute(scene);
+    skyboxPass.execute(scene, ctx);
     
     // Stereogram pass
     if (ctx->stereoRendering) {

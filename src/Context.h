@@ -15,6 +15,9 @@ struct Context {
     bool vSync = true;
     float moveSpeed = 15.0f;
     float mouseSensitivity = 0.25f;
+    bool toon = false;
+    float colorResolution = 1.0;
+    bool fullscreen = false;
 
     // Sterogram setting
     bool stereoRendering = true;

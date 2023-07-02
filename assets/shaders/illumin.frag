@@ -16,8 +16,12 @@ uniform float Ks;
 
 uniform vec3 specularColor;
 uniform float shininess;
+uniform float colorResolution;
 
-void main() {
+subroutine vec3 illum();
+subroutine uniform illum illumModel;
+
+subroutine (illum) vec3 phong() {
     vec3 albedo = texture(tex, uv*repeat).rgb;
     vec3 color = Ka*albedo;
     vec3 N = normalize(vNormal);
@@ -33,6 +37,30 @@ void main() {
       color += Kd*lambertian*albedo;
       color += Ks*specular*specularColor;
     }
+  
+    return color;
+}
 
-    colorFrag = vec4(color, 1.0);
+subroutine (illum) vec3 toon() {
+    vec3 albedo = texture(tex, uv*repeat).rgb;
+    vec3 color = Ka*albedo;
+    vec3 N = normalize(vNormal);
+    vec3 L = normalize(lightDir);
+    float lambertian = step(0.5, max(dot(L,N), 0.0));
+
+    if (lambertian > 0.0) {
+      vec3 V = normalize(vViewPosition);
+      vec3 H = normalize(L + V);
+      float specAngle = max(dot(H, N), 0.0);
+      float specular = step(0.2, pow(specAngle, shininess));
+
+      color += Kd*lambertian*albedo;
+      color += Ks*specular*specularColor;
+    }
+  
+    return color;
+}
+
+void main() {
+  colorFrag = vec4(round(illumModel()*255.0*pow(colorResolution, 3.0))/(255.0*pow(colorResolution, 3.0)), 1.0);
 }

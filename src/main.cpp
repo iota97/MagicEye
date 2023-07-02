@@ -35,7 +35,18 @@ int main() {
     Render render(window, &ctx);
 
     bool firstFrame = true;
+    bool fullscreen = false;
     while (!glfwWindowShouldClose(window)) {
+        if (fullscreen != ctx.fullscreen) {
+            fullscreen = ctx.fullscreen;
+            GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+            const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+            if (fullscreen) {
+                glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+            } else {
+                glfwSetWindowMonitor(window, 0, mode->width/2-screenWidth/2, mode->height/2-screenHeight/2, screenWidth, screenHeight, GLFW_DONT_CARE);
+            }
+        }
         sceneManager.Process();
         render.Process(sceneManager.GetScene());
         if (firstFrame) {
