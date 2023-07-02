@@ -1,5 +1,5 @@
 CXX = c++
-CXXFLAGS  = -g -O2 -Wall -Wno-invalid-offsetof -std=c++11 -I./ext
+CXXFLAGS  = -g -O2 -Wall -Wno-invalid-offsetof -std=c++17 -I./ext
 LDFLAGS = -L/usr/lib -lassimp -lglfw -lz -lminizip -lGL
 TARGET = magiceye
 BUILDIR = build

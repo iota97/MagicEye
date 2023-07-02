@@ -17,6 +17,7 @@ Universita' degli Studi di Milano
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include "exe_path.h"
 
 /////////////////// SHADER class ///////////////////////
 class Shader
@@ -41,8 +42,8 @@ public:
         try
         {
             // Open files
-            vShaderFile.open(vertexPath);
-            fShaderFile.open(fragmentPath);
+            vShaderFile.open(getExePath()+vertexPath);
+            fShaderFile.open(getExePath()+fragmentPath);
             std::stringstream vShaderStream, fShaderStream;
             // Read file's buffer contents into streams
             vShaderStream << vShaderFile.rdbuf();

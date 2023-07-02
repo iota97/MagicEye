@@ -32,6 +32,7 @@ Universita' degli Studi di Milano
 #include <iostream>
 // we include the Mesh class, which manages the "OpenGL side" (= creation and allocation of VBO, VAO, EBO buffers) of the loading of models
 #include <utils/mesh.h>
+#include "exe_path.h"
 
 /////////////////// MODEL class ///////////////////////
 class Model
@@ -96,7 +97,7 @@ private:
         // VERY IMPORTANT: calculation of Tangents and Bitangents is possible only if the model has Texture Coordinates
         // If they are not present, the calculation is skipped (but no error is provided in the following checks!)
         Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
+        const aiScene* scene = importer.ReadFile(getExePath()+path, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
 
         // check for errors (see comment above)
         if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)

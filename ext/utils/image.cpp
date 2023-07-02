@@ -4,12 +4,13 @@
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include "exe_path.h"
 
 GLint LoadTexture(const char* path) {
     GLuint textureImage;
     int w, h, channels;
     unsigned char* image;
-    image = stbi_load(path, &w, &h, &channels, STBI_rgb);
+    image = stbi_load((getExePath()+path).c_str(), &w, &h, &channels, STBI_rgb);
 
     if (image == nullptr)
         std::cout << "Failed to load texture!" << std::endl;
@@ -44,7 +45,7 @@ void LoadTextureCubeSide(std::string path, std::string side_image, GLuint side_n
     std::string fullname;
 
     // full name and path of the side of the cubemap
-    fullname = path + side_image;
+    fullname = getExePath() + path + side_image;
     // we load the image file
     image = stbi_load(fullname.c_str(), &w, &h, 0, STBI_rgb);
     if (image == nullptr)
