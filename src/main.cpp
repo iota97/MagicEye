@@ -8,7 +8,11 @@
 GLuint screenWidth = 1280, screenHeight = 720;
 static Context ctx;
 
+#ifdef _WIN32
+int WinMain() {
+#else
 int main() {
+#endif
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);

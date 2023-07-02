@@ -4,6 +4,7 @@
 #include "utils/image.h"
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <vector>
 
 StereoPass::StereoPass(Context *c) : shader("assets/shaders/stereogram.vert", "assets/shaders/stereogram.frag"), ctx(c) {
     // Create fullscreen quad
@@ -128,7 +129,7 @@ void StereoPass::execute(GLuint colorMap, GLuint depthMap) {
     glGetProgramStageiv(shader.Program, GL_FRAGMENT_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS, &n);
     GLint computePassLocation = glGetSubroutineUniformLocation(shader.Program, GL_FRAGMENT_SHADER, "computePass");
     GLint patternLocation = glGetSubroutineUniformLocation(shader.Program, GL_FRAGMENT_SHADER, "pattern");
-    GLuint index[n];
+    std::vector<GLuint> index(n);
     switch (ctx->pattern) {
         case 0:
             index[patternLocation] = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, "perlinNoise");
@@ -152,13 +153,13 @@ void StereoPass::execute(GLuint colorMap, GLuint depthMap) {
     // First pass
     glDisable(GL_DEPTH_TEST);
     index[computePassLocation] = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, "firstPass");
-    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, n, index);
+    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, n, &index[0]);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     // Second pass, barrier needed
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
     index[computePassLocation] = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, "secondPass");
-    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, n, index);
+    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, n, &index[0]);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     // Clean up

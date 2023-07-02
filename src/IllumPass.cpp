@@ -1,6 +1,7 @@
 #include "IllumPass.h"
 #include "Object.h"
 
+#include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
@@ -18,10 +19,10 @@ void IllumPass::execute(Scene *scene) {
     // Select illum model
     GLsizei n;
     glGetProgramStageiv(shader.Program, GL_FRAGMENT_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS, &n);
-    GLuint index[n];
+    std::vector<GLuint> index(n);
     GLint computePassLocation = glGetSubroutineUniformLocation(shader.Program, GL_FRAGMENT_SHADER, "illumModel");
     index[computePassLocation] = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, ctx->toon ? "toon" : "phong");
-    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, n, index);
+    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, n, &index[0]);
 
     // Camera setup
     glm::mat4 projection = scene->cam->GetProjectionMatrix();
