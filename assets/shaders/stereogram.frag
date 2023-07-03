@@ -133,7 +133,13 @@ void make_kernel(inout vec4 n[9], sampler2D tex, vec2 coord) {
 
 bool checkEdge(vec2 co) {
     vec4 n[9];
-	make_kernel(n, edgeNormal ? normalTex : colorTex, uv);
+
+    // no ternary on sample on AMD...
+    if (edgeNormal) {
+	    make_kernel(n, normalTex , uv);
+    } else {
+        make_kernel(n, colorTex, uv);
+    }
 
 	vec4 sobel_edge_h = n[2] + (2.0*n[5]) + n[8] - (n[0] + (2.0*n[3]) + n[6]);
   	vec4 sobel_edge_v = n[0] + (2.0*n[1]) + n[2] - (n[6] + (2.0*n[7]) + n[8]);
