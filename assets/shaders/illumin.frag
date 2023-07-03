@@ -1,6 +1,6 @@
 #version 430 core
 
-out vec4 colorFrag;
+out vec4 colorFrag[2];
 
 in vec3 lightDir;
 in vec3 vNormal;
@@ -62,5 +62,6 @@ subroutine (illum) vec3 toon() {
 }
 
 void main() {
-  colorFrag = vec4(round(illumModel()*255.0*pow(colorResolution, 3.0))/(255.0*pow(colorResolution, 3.0)), 1.0);
+  colorFrag[0] = vec4(round(illumModel()*255.0*pow(colorResolution, 3.0))/(255.0*pow(colorResolution, 3.0)), 1.0);
+  colorFrag[1] = vec4(vNormal, 1.0);
 }

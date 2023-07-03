@@ -76,7 +76,7 @@ StereoPass::~StereoPass() {
     }
 }
 
-void StereoPass::execute(GLuint colorMap, GLuint depthMap) {
+void StereoPass::execute(GLuint colorTex, GLuint depthTex, GLuint normalTex) {
     shader.Use();
 
     // Keep the SSBO matching the screen size
@@ -102,6 +102,7 @@ void StereoPass::execute(GLuint colorMap, GLuint depthMap) {
     glUniform1f(glGetUniformLocation(shader.Program, "sceneColorStr"), ctx->sceneColorStr);
     glUniform1f(glGetUniformLocation(shader.Program, "edgeStr"), ctx->edgeStr);
     glUniform1f(glGetUniformLocation(shader.Program, "edgeThreshold"), ctx->edgeThreshold);
+    glUniform1f(glGetUniformLocation(shader.Program, "edgeNormal"), ctx->edgeNormal);
 
     // Clear color and edge SSBO
     GLint zero = 0;
@@ -113,13 +114,17 @@ void StereoPass::execute(GLuint colorMap, GLuint depthMap) {
 
     // Textures
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, depthMap);
-    GLint textureLocation = glGetUniformLocation(shader.Program, "depthMap");
+    glBindTexture(GL_TEXTURE_2D, depthTex);
+    GLint textureLocation = glGetUniformLocation(shader.Program, "depthTex");
     glUniform1i(textureLocation, 0);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, colorMap);
-    textureLocation = glGetUniformLocation(shader.Program, "colorMap");
+    glBindTexture(GL_TEXTURE_2D, colorTex);
+    textureLocation = glGetUniformLocation(shader.Program, "colorTex");
     glUniform1i(textureLocation, 1);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, normalTex);
+    textureLocation = glGetUniformLocation(shader.Program, "normalTex");
+    glUniform1i(textureLocation, 2);
 
     // Bind quad
     glBindVertexArray(VAO);
@@ -144,10 +149,10 @@ void StereoPass::execute(GLuint colorMap, GLuint depthMap) {
     
     // Bind pattern texture
     if (ctx->pattern > 1) {
-        glActiveTexture(GL_TEXTURE2);
+        glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, pattern[ctx->pattern-2]);
         textureLocation = glGetUniformLocation(shader.Program, "randomTexture");
-        glUniform1i(textureLocation, 2);
+        glUniform1i(textureLocation, 3);
     }
 
     // First pass

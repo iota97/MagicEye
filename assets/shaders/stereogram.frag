@@ -3,8 +3,9 @@
 in vec2 uv;
 out vec4 colorFrag;
 
-uniform sampler2D depthMap;
-uniform sampler2D colorMap;
+uniform sampler2D depthTex;
+uniform sampler2D colorTex;
+uniform sampler2D normalTex;
 uniform sampler2D randomTexture;
 
 uniform int bufferWidth;
@@ -16,6 +17,7 @@ uniform float edgeStr;
 uniform float sceneColorStr;
 uniform float depthStrength;
 uniform float edgeThreshold;
+uniform bool edgeNormal;
 
 layout (std430, binding = 0) coherent buffer Color {
   ivec4 color[];
@@ -110,7 +112,7 @@ int index(vec2 co) {
 }
 
 float sampleDepth(vec2 uv) {
-    return pow(texture(depthMap, uv).r, depthStrength);
+    return pow(texture(depthTex, uv).r, depthStrength);
 }
 
 
@@ -131,7 +133,7 @@ void make_kernel(inout vec4 n[9], sampler2D tex, vec2 coord) {
 
 bool checkEdge(vec2 co) {
     vec4 n[9];
-	make_kernel(n, colorMap, uv);
+	make_kernel(n, edgeNormal ? normalTex : colorTex, uv);
 
 	vec4 sobel_edge_h = n[2] + (2.0*n[5]) + n[8] - (n[0] + (2.0*n[3]) + n[6]);
   	vec4 sobel_edge_v = n[0] + (2.0*n[1]) + n[2] - (n[6] + (2.0*n[7]) + n[8]);
@@ -182,7 +184,7 @@ subroutine (stereoPass) vec4 firstPass() {
     currCoord.x = mod(currCoord.x, 1.0);
     UV[index(uv)] = currCoord;
 
-    vec3 col = texture(colorMap, uv).rgb;
+    vec3 col = texture(colorTex, uv).rgb;
     int i = index(currCoord);
     atomicAdd(color[i].r, int(col.r*255));
     atomicAdd(color[i].g, int(col.g*255));

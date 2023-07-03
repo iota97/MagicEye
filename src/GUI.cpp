@@ -39,6 +39,8 @@ void GUI::RenderMenu() {
     const char* scene[] = {"Standard", "Fairy", "Church", "Fight", "Windmill", "Space"};
     ImGui::Combo("Scene", &ctx->sceneId, scene, IM_ARRAYSIZE(scene));
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
+
+    ImGui::Text("Misc settings");
     ImGui::SliderFloat("Movement speed", &ctx->moveSpeed, 1.0f, 100.0f, "%.1f");
     ImGui::SliderFloat("Mouse sensitivity", &ctx->mouseSensitivity, 0.05f, 2.0f, "%.2f");
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
@@ -48,6 +50,7 @@ void GUI::RenderMenu() {
     ImGui::Checkbox("VSync", &ctx->vSync);
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
+    ImGui::Text("Rendering settings");
     ImGui::Checkbox("Toon shading", &ctx->toon);
     ImGui::Dummy(ImVec2(0.0f, 1.0f));
     ImGui::SliderFloat("Color resolution", &ctx->colorResolution, 0.01f, 1.0f, "%.2f");
@@ -60,15 +63,18 @@ void GUI::RenderMenu() {
     ImGui::SliderFloat("Observer distance", &ctx->obsDistance, 0.1f, 5.0f, "%.2f");
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
+    ImGui::Text("Pattern settings");
     const char* pattern[] = {"Perlin noise", "Perlin noise (RGB)", "RGB noise", "Colorful", "Cubes", "Symbols", "Wavy"};
     ImGui::Combo("Pattern", &ctx->pattern, pattern, IM_ARRAYSIZE(pattern));
     ImGui::SameLine();
     ImGui::Checkbox("Static", &ctx->staticPattern);
+    ImGui::SliderFloat("Scene color", &ctx->sceneColorStr, 0.0f, 1.0f, "%.1f");
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
-    ImGui::SliderFloat("Scene color", &ctx->sceneColorStr, 0.0f, 1.0f, "%.1f");
+    ImGui::Text("Edge detection settings");
     ImGui::SliderFloat("Edge strength", &ctx->edgeStr, 0.0f, 1.0f, "%.1f");
-    ImGui::SliderFloat("Edge threshold", &ctx->edgeThreshold, 0.0f, 3.0f, "%.2f");
+    ImGui::SliderFloat("Edge threshold", &ctx->edgeThreshold, 0.0f, 10.0f, "%.2f");
+    ImGui::Checkbox("Use normals for edge detection", &ctx->edgeNormal);
 
     ImGui::End();
     ImGui::Render();

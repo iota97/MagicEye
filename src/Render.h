@@ -22,7 +22,7 @@ private:
     GLfloat lastFrame = 0;
 
     int oldH = -1, oldW = -1;
-    GLuint FBO, depthMap, colorMap;
+    GLuint FBO, depth, color, normal;
 
     IllumPass illumPass;
     SkyboxPass skyboxPass;

@@ -10,7 +10,7 @@ public:
     StereoPass(Context *c);
     ~StereoPass();
 
-    void execute(GLuint colorMap, GLuint depthMap);
+    void execute(GLuint colorTex, GLuint depthTex, GLuint normalTex);
 
 private:
     Shader shader;
