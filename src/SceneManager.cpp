@@ -42,5 +42,8 @@ void SceneManager::SetScene(int id) {
         case 5:
             scene = new SceneSpace(&cam, window, ctx);
             break;
+        case 6:
+            scene = new SceneDance(&cam, window, ctx);
+            break;
     }
 }

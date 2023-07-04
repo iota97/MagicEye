@@ -301,3 +301,25 @@ SceneSpace::SceneSpace(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w
 	obj.shininess = 150;
 	objects.push_back(obj);
 }
+
+SceneDance::SceneDance(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w, c) {
+	sc->SetPosition(glm::vec3(-1.193125, 5.257594, -15.947473));
+    sc->SetRotation(87.500000, -1.750000);
+
+	lightDir = glm::vec3(-0.940326, -0.254602, 0.225752);
+	SetSkybox("assets/textures/cubes/fantasy/");
+
+	textures.push_back(LoadTexture("assets/textures/Vampire_diffuse.png"));
+	skinned_models.push_back(ModelAnimated("assets/models/dancing_vampire.dae"));
+	animations.push_back(Animation("assets/models/dancing_vampire.dae", &skinned_models[0]));
+	animators.push_back(Animator(&animations[0]));
+
+	SkinnedObject s_obj;
+	s_obj.s_model = &skinned_models[0];
+	s_obj.texture = textures[0];
+	s_obj.position = glm::vec3(0);
+	s_obj.rotation = glm::vec3(0, 180, 0);
+	s_obj.scale = glm::vec3(5);
+	s_obj.anim = &animators[0];
+	skinned_objects.push_back(s_obj);
+}

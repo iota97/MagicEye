@@ -6,6 +6,10 @@
 #include "SceneCamera.h"
 #include "Object.h"
 #include "utils/model.h"
+#include "utils/model_animation.h"
+#include "utils/animator.h"
+#include "utils/animation.h"
+
 #include "Context.h"
 
 class Scene {
@@ -20,13 +24,17 @@ public:
     GLuint skybox;
 
     std::vector<Object> objects;
+    std::vector<SkinnedObject> skinned_objects;
 
 protected:
     void SetSkybox(const char* path);
     GLFWwindow *window;
     Context *ctx;
     std::vector<Model> models;
+    std::vector<ModelAnimated> skinned_models;
     std::vector<GLuint> textures;
+    std::vector<Animator> animators;
+    std::vector<Animation> animations;
 };
 
 class SceneStandard : public Scene {
@@ -58,4 +66,9 @@ public:
 class SceneSpace : public Scene {
 public:
     SceneSpace(SceneCamera *sc, GLFWwindow *w, Context *c);
+};
+
+class SceneDance : public Scene {
+public:
+    SceneDance(SceneCamera *sc, GLFWwindow *w, Context *c);
 };

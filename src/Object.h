@@ -3,6 +3,8 @@
 #include <glm/glm.hpp>
 
 class Model;
+class ModelAnimated;
+class Animator;
 struct Object {
     glm::vec3 position = glm::vec3(0.0, 0.0, 0.0);
     glm::vec3 rotation = glm::vec3(0.0, 0.0, 0.0);
@@ -16,4 +18,9 @@ struct Object {
     float shininess = 500.0;
     float diffuseFactor = 1.0;
     float specularFactor = 0.4;
+};
+
+struct SkinnedObject : public Object{
+    ModelAnimated *s_model;
+    Animator *anim;
 };

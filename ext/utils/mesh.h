@@ -29,6 +29,8 @@ Universita' degli Studi di Milano
 // Std. Includes
 #include <vector>
 
+#define MAX_BONE_INFLUENCE 100
+
 // data structure for vertices
 struct Vertex {
     // vertex coordinates
@@ -41,6 +43,10 @@ struct Vertex {
     glm::vec3 Tangent;
     // Bitangent
     glm::vec3 Bitangent;
+    //bone indexes which will influence this vertex
+	int m_BoneIDs[MAX_BONE_INFLUENCE];
+	//weights from each bone
+	float m_Weights[MAX_BONE_INFLUENCE];
 };
 
 /////////////////// MESH class ///////////////////////
@@ -179,6 +185,12 @@ private:
         // Bitangent
         glEnableVertexAttribArray(4);
         glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Bitangent));
+        // ids
+        glEnableVertexAttribArray(5);
+		glVertexAttribIPointer(5, 4, GL_INT, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_BoneIDs));
+		// weights
+		glEnableVertexAttribArray(6);
+		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, m_Weights));
 
         // Note that this is allowed, the call to glVertexAttribPointer registered VBO as the currently bound vertex buffer object so afterwards we can safely unbind
         glBindBuffer(GL_ARRAY_BUFFER, 0); 

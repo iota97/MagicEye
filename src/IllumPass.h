@@ -4,6 +4,11 @@
 #include "utils/shader.h"
 #include "Context.h"
 #include "Scene.h"
+#include "utils/animator.h"
+#include "utils/shader.h"
+#include "utils/model.h"
+#include "utils/model_animation.h"
+#include "utils/image.h"
 
 class IllumPass {
 public:
@@ -13,6 +18,10 @@ public:
     void execute(Scene *scene);
     
 private:
-    Shader shader;
+    void SetupScene(Shader &shader, Scene *scene);
+    void SetupObject(Shader &shader, Scene *scene, Object &obj);
+
+    Shader illumShader;
+    Shader skinningShader;
     Context *ctx;
 };
