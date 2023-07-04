@@ -18,6 +18,8 @@ struct Context {
     bool toon = false;
     float colorResolution = 1.0;
     bool fullscreen = false;
+    float animSpeed = 1.0;
+    bool dqSkinning = true;
 
     // Sterogram setting
     bool stereoRendering = true;

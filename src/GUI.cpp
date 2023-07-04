@@ -45,19 +45,25 @@ void GUI::RenderMenu() {
     ImGui::SliderFloat("Mouse sensitivity", &ctx->mouseSensitivity, 0.05f, 2.0f, "%.2f");
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
+    ImGui::Text("Rendering settings");
     ImGui::Checkbox("Fullscreen", &ctx->fullscreen);
     ImGui::SameLine();
     ImGui::Checkbox("VSync", &ctx->vSync);
-    ImGui::Dummy(ImVec2(0.0f, 10.0f));
-
-    ImGui::Text("Rendering settings");
+    ImGui::SameLine();
     ImGui::Checkbox("Toon shading", &ctx->toon);
+    ImGui::SameLine();
+    ImGui::Checkbox("DQ skinning", &ctx->dqSkinning);
+
     ImGui::Dummy(ImVec2(0.0f, 1.0f));
     ImGui::SliderFloat("Color resolution", &ctx->colorResolution, 0.01f, 1.0f, "%.2f");
+    ImGui::SliderFloat("Animation speed", &ctx->animSpeed, 0.0f, 3.0f, "%.1f");
+
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
     ImGui::Checkbox("Stereogram rendering", &ctx->stereoRendering);
     ImGui::Dummy(ImVec2(0.0f, 1.0f));
+    
+    ImGui::Text("Depth settings");
     ImGui::SliderFloat("Depth strength", &ctx->depthStrength, 0.5f, 20.0f, "%.1f");
     ImGui::SliderFloat("Eye separation", &ctx->eyeSep, 0.1f, 2.0f, "%.2f");
     ImGui::SliderFloat("Observer distance", &ctx->obsDistance, 0.1f, 5.0f, "%.2f");

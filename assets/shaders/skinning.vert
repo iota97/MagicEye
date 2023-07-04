@@ -17,6 +17,7 @@ const int MAX_BONE_INFLUENCE = 4;
 
 uniform vec4 finalPrimal[MAX_BONES];
 uniform vec4 finalDual[MAX_BONES];
+uniform mat4 finalBonesMatrices[MAX_BONES];
 
 out vec3 lightDir;
 out vec3 vNormal;
@@ -34,8 +35,11 @@ vec4 p_mul(vec4 ap, vec4 bp) {
 vec4 d_mul(vec4 ap, vec4 ad, vec4 bp, vec4 bd) {
     return q_mul(ap, bd) + q_mul(ad, bp);
 }
-	
-void main() {
+
+subroutine vec4 skin();
+subroutine uniform skin skinning;
+
+subroutine (skin) vec4 dualQuat() {
     vec4 totalP = vec4(0.0f);
     vec4 totalD = vec4(0.0f);
     
@@ -54,7 +58,7 @@ void main() {
             si = -1.0;
         }
         totalP += si * finalPrimal[boneIds[i]] * weights[i];
-        totalD += si *finalDual[boneIds[i]] * weights[i];
+        totalD += si * finalDual[boneIds[i]] * weights[i];
     }    
 
     // Normalize
@@ -74,10 +78,32 @@ void main() {
     posP = p_mul(totalP, posP);
     posD = d_mul(posP, posD, totalPcon, totalDcon);
 
-    vec4 mvPosition = viewMatrix * modelMatrix * vec4(posD.xyz, 1.0);
-    vViewPosition = -mvPosition.xyz;
-    
     vNormal = normalize(normalMatrix * q_mul(q_mul(totalP, vec4(norm, 0.0)), totalPcon).xyz);
+    return vec4(posD.xyz, 1.0);
+}
+
+subroutine (skin) vec4 matrix() {
+    mat4 totalTrasform = mat4(0.0f);
+    
+    for(int i = 0 ; i < MAX_BONE_INFLUENCE ; i++) {
+        if (boneIds[i] == -1) 
+            continue;
+
+        if (boneIds[i] >= MAX_BONES) {
+            totalTrasform = mat4(1.0f);
+            break;
+        }
+
+        totalTrasform += finalBonesMatrices[boneIds[i]] * weights[i];
+    }    
+
+    vNormal = normalize(normalMatrix * inverse(transpose(mat3(totalTrasform))) * norm);
+    return totalTrasform * vec4(pos, 1.0);
+}
+	
+void main() {
+    vec4 mvPosition = viewMatrix * modelMatrix * skinning();
+    vViewPosition = -mvPosition.xyz;
     lightDir = vec3(viewMatrix * vec4(lightVector, 0.0));
     gl_Position =  projectionMatrix * mvPosition;
     uv = tex;

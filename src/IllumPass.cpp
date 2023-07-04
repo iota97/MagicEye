@@ -83,32 +83,47 @@ void IllumPass::execute(Scene *scene) {
         obj.model->Draw();
     }
 
-    skinningShader.Use();
-    SetupScene(skinningShader, scene);
+    if (!scene->skinned_objects.empty()) {
+        skinningShader.Use();
+        SetupScene(skinningShader, scene);
 
-    for (auto &obj : scene->skinned_objects) {
-        obj.anim->UpdateAnimation(ctx->deltaTime);
-        SetupObject(skinningShader, scene, obj);
-        auto transforms = obj.anim->GetFinalBoneMatrices();
-        for (size_t i = 0; i < transforms.size(); ++i) {
-            glm::vec3 scale;
-            glm::quat rotation(1, 0, 0, 0);
-            glm::vec3 translation(0);
-            glm::vec3 skew;
-            glm::vec4 perspective;
-            glm::decompose(transforms[i], scale, rotation, translation, skew, perspective);
+        GLsizei n;
+        glGetProgramStageiv(skinningShader.Program, GL_VERTEX_SHADER, GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS, &n);
+        std::vector<GLuint> index(n);
+        GLint skinningLocation = glGetSubroutineUniformLocation(skinningShader.Program, GL_VERTEX_SHADER, "skinning");
+        index[skinningLocation] = glGetSubroutineIndex(skinningShader.Program, GL_VERTEX_SHADER, ctx->dqSkinning ? "dualQuat" : "matrix");
+        glUniformSubroutinesuiv(GL_VERTEX_SHADER, n, &index[0]);
 
-            // glm will normalize the quaterion after a multiplication, was fun to find out...
-            glm::vec4 primal(rotation.x, rotation.y, rotation.z, rotation.w);
-            glm::vec4 dual;
-            dual.x = glm::cross(0.5f*translation, glm::vec3(primal)).x + rotation.w * 0.5f*translation.x;
-            dual.y = glm::cross(0.5f*translation, glm::vec3(primal)).y + rotation.w * 0.5f*translation.y;
-            dual.z = glm::cross(0.5f*translation, glm::vec3(primal)).z + rotation.w * 0.5f*translation.z;
-            dual.w = -glm::dot(0.5f*translation, glm::vec3(primal));
+        for (auto &obj : scene->skinned_objects) {
+            obj.anim->UpdateAnimation(ctx->deltaTime*ctx->animSpeed);
+            SetupObject(skinningShader, scene, obj);
 
-            glUniform4fv(glGetUniformLocation(skinningShader.Program, ("finalPrimal[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(primal));
-            glUniform4fv(glGetUniformLocation(skinningShader.Program, ("finalDual[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(dual));
+            auto transforms = obj.anim->GetFinalBoneMatrices();
+            for (size_t i = 0; i < transforms.size(); ++i) {
+                if (!ctx->dqSkinning) {
+                    glUniformMatrix4fv(glGetUniformLocation(skinningShader.Program,
+                        ("finalBonesMatrices[" + std::to_string(i) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(transforms[i]));
+                } else {
+                    glm::vec3 scale;
+                    glm::quat rotation(1, 0, 0, 0);
+                    glm::vec3 translation(0);
+                    glm::vec3 skew;
+                    glm::vec4 perspective;
+                    glm::decompose(transforms[i], scale, rotation, translation, skew, perspective);
+
+                    // glm will normalize the quaterion after a multiplication, was fun to find out...
+                    glm::vec4 primal(rotation.x, rotation.y, rotation.z, rotation.w);
+                    glm::vec4 dual;
+                    dual.x = glm::cross(0.5f*translation, glm::vec3(primal)).x + rotation.w * 0.5f*translation.x;
+                    dual.y = glm::cross(0.5f*translation, glm::vec3(primal)).y + rotation.w * 0.5f*translation.y;
+                    dual.z = glm::cross(0.5f*translation, glm::vec3(primal)).z + rotation.w * 0.5f*translation.z;
+                    dual.w = -glm::dot(0.5f*translation, glm::vec3(primal));
+
+                    glUniform4fv(glGetUniformLocation(skinningShader.Program, ("finalPrimal[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(primal));
+                    glUniform4fv(glGetUniformLocation(skinningShader.Program, ("finalDual[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(dual));
+                }
+            }
+            obj.s_model->Draw();
         }
-        obj.s_model->Draw();
     }
 }
