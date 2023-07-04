@@ -72,3 +72,8 @@ class SceneDance : public Scene {
 public:
     SceneDance(SceneCamera *sc, GLFWwindow *w, Context *c);
 };
+
+class SceneAnimal : public Scene {
+public:
+    SceneAnimal(SceneCamera *sc, GLFWwindow *w, Context *c);
+};

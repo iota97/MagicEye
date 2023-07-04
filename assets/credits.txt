@@ -21,3 +21,6 @@ Space:
 "3D T.I.E Fighter - Star Wars model" (https://skfb.ly/Q98Y) by Mickael Boitte is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 "Xwing" (https://sketchfab.com/3d-models/xwing-b360b8e539414432805734ae47adb376) by FEDERICOFELICI (https://sketchfab.com/FEDERICOFELICI) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
 "FREE - SkyBox Space Nebula" (https://sketchfab.com/3d-models/free-skybox-space-nebula-fa5c19c4f7cc4525a24b99425bd520c8) by Paul (https://sketchfab.com/paul_paul_paul) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+
+Cat:
+"Toon Cat FREE" (https://skfb.ly/6TKrP) by Omabuarts Studio is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).

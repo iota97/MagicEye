@@ -45,5 +45,8 @@ void SceneManager::SetScene(int id) {
         case 6:
             scene = new SceneDance(&cam, window, ctx);
             break;
+        case 7:
+            scene = new SceneAnimal(&cam, window, ctx);
+            break;
     }
 }

@@ -104,7 +104,7 @@ void IllumPass::execute(Scene *scene) {
                     glUniformMatrix4fv(glGetUniformLocation(skinningShader.Program,
                         ("finalBonesMatrices[" + std::to_string(i) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(transforms[i]));
                 } else {
-                    glm::vec3 scale;
+                    glm::vec3 scale(1, 1, 1);
                     glm::quat rotation(1, 0, 0, 0);
                     glm::vec3 translation(0);
                     glm::vec3 skew;
@@ -121,6 +121,7 @@ void IllumPass::execute(Scene *scene) {
 
                     glUniform4fv(glGetUniformLocation(skinningShader.Program, ("finalPrimal[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(primal));
                     glUniform4fv(glGetUniformLocation(skinningShader.Program, ("finalDual[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(dual));
+                    glUniform3fv(glGetUniformLocation(skinningShader.Program, ("finalScale[" + std::to_string(i) + "]").c_str()), 1, glm::value_ptr(scale));
                 }
             }
             obj.s_model->Draw();

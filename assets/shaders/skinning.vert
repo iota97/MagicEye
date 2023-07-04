@@ -17,6 +17,7 @@ const int MAX_BONE_INFLUENCE = 4;
 
 uniform vec4 finalPrimal[MAX_BONES];
 uniform vec4 finalDual[MAX_BONES];
+uniform vec3 finalScale[MAX_BONES];
 uniform mat4 finalBonesMatrices[MAX_BONES];
 
 out vec3 lightDir;
@@ -42,6 +43,7 @@ subroutine uniform skin skinning;
 subroutine (skin) vec4 dualQuat() {
     vec4 totalP = vec4(0.0f);
     vec4 totalD = vec4(0.0f);
+    vec3 scale = vec3(0.0f);
     
     for(int i = 0 ; i < MAX_BONE_INFLUENCE ; i++) {
         if (boneIds[i] == -1) 
@@ -50,9 +52,11 @@ subroutine (skin) vec4 dualQuat() {
         if (boneIds[i] >= MAX_BONES) {
             totalP = vec4(0.0f, 0.0f, 0.0f, 1.0f);
             totalD = vec4(0.0f);
+            scale = vec3(1.0f);
             break;
         }
-
+        scale += finalScale[boneIds[i]] * weights[i];
+        
         float si = 1.0;
         if (dot(finalPrimal[boneIds[i]], totalP) < 0) {
             si = -1.0;
@@ -72,7 +76,7 @@ subroutine (skin) vec4 dualQuat() {
     vec4 totalDcon = vec4(totalD.xyz, -totalD.w);
 
     vec4 posP = vec4(0.0, 0.0, 0.0, 1.0);
-    vec4 posD = vec4(pos, 0.0);
+    vec4 posD = vec4(scale*pos, 0.0);
 
     posD = d_mul(totalP, totalD, posP, posD);
     posP = p_mul(totalP, posP);
