@@ -310,8 +310,11 @@ SceneDance::SceneDance(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w
 	SetSkybox("assets/textures/cubes/fantasy/");
 
 	textures.push_back(LoadTexture("assets/textures/Vampire_diffuse.png"));
-	skinned_models.push_back(ModelAnimated("assets/models/dancing_vampire.dae"));
-	animations.push_back(Animation("assets/models/dancing_vampire.dae", &skinned_models[0]));
+	// Why 2 formats? Collada is completely broken...
+	// FBX have broken animation loop...
+	// glTF have some broken vertex...
+	skinned_models.push_back(ModelAnimated("assets/models/vamp.fbx"));
+	animations.push_back(Animation("assets/models/vamp.glb", &skinned_models[0]));
 	animators.push_back(Animator(&animations[0]));
 
 	SkinnedObject s_obj;
@@ -319,7 +322,7 @@ SceneDance::SceneDance(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w
 	s_obj.texture = textures[0];
 	s_obj.position = glm::vec3(0);
 	s_obj.rotation = glm::vec3(0, 180, 0);
-	s_obj.scale = glm::vec3(5);
+	s_obj.scale = glm::vec3(0.05);
 	s_obj.anim = &animators[0];
 	skinned_objects.push_back(s_obj);
 }
