@@ -31,7 +31,10 @@ public:
     string directory;
     bool gammaCorrection;
 	
-	
+	ModelAnimated(const ModelAnimated& copy) = delete; //disallow copy
+    ModelAnimated& operator=(const ModelAnimated&) = delete;
+    ModelAnimated(ModelAnimated&& move) = default; //internally does a memberwise std::move
+    ModelAnimated& operator=(ModelAnimated&&) noexcept = default;
 
     // constructor, expects a filepath to a 3D model.
     ModelAnimated(string const &path, bool gamma = false) : gammaCorrection(gamma)
