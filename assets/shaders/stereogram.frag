@@ -190,12 +190,13 @@ subroutine (stereoPass) vec4 firstPass() {
     currCoord.x = mod(currCoord.x, 1.0);
     UV[index(uv)] = currCoord;
 
-    vec3 col = texture(colorTex, uv).rgb;
+    vec4 col = texture(colorTex, uv);
+    col.rgb *= col.a;
     int i = index(currCoord);
-    atomicAdd(color[i].r, int(col.r*255));
-    atomicAdd(color[i].g, int(col.g*255));
-    atomicAdd(color[i].b, int(col.b*255));
-    atomicAdd(color[i].a, 1);
+    atomicAdd(color[i].r, int(col.r*4096));
+    atomicAdd(color[i].g, int(col.g*4096));
+    atomicAdd(color[i].b, int(col.b*4096));
+    atomicAdd(color[i].a, int(col.a*4096));
 
     if (checkEdge(uv)) {
         atomicExchange(edge[i], 1);
@@ -207,7 +208,10 @@ subroutine (stereoPass) vec4 secondPass() {
     vec2 co = UV[index(uv)];
     int i = index(co);
     vec3 random = pattern(co);
-    vec3 col = color[i].rgb/(color[i].w*255.0);
+    vec3 col = vec3(0.0);
+    if (color[i].w != 0) {
+        col = color[i].rgb/float(color[i].w);
+    }
     col = mix(col, random, 1.0-sceneColorStr);
     float edgeFactor = bool(edge[i]) ? 1.0-edgeStr : 1.0;
     return vec4(col*edgeFactor, 1.0);

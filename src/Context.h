@@ -27,6 +27,7 @@ struct Context {
     float eyeSep = 0.3;
     float obsDistance = 1.1;
     float sceneColorStr = 0.9;
+    float skyInflunce = 0.01;
     float edgeStr = 0.4;
     float edgeThreshold = 1.0;
     bool edgeNormal = true;

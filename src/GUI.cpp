@@ -74,7 +74,8 @@ void GUI::RenderMenu() {
     ImGui::Combo("Pattern", &ctx->pattern, pattern, IM_ARRAYSIZE(pattern));
     ImGui::SameLine();
     ImGui::Checkbox("Static", &ctx->staticPattern);
-    ImGui::SliderFloat("Scene color", &ctx->sceneColorStr, 0.0f, 1.0f, "%.1f");
+    ImGui::SliderFloat("Scene color", &ctx->sceneColorStr, 0.0f, 1.0f, "%.2f");
+    ImGui::SliderFloat("Skybox influnce", &ctx->skyInflunce, 0.0f, 1.0f, "%.2f");
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
     ImGui::Text("Edge detection settings");

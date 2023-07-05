@@ -18,6 +18,7 @@ void SkyboxPass::execute(Scene *scene, Context *ctx) {
     glBindTexture(GL_TEXTURE_CUBE_MAP, scene->skybox);
     glUniform1i(glGetUniformLocation(shader.Program, "cubemap"), 0);
     glUniform1f(glGetUniformLocation(shader.Program, "colorResolution"), ctx->colorResolution);
+    glUniform1f(glGetUniformLocation(shader.Program, "skyInflunce"), ctx->skyInflunce);
 
     // Matrix
     glm::mat4 projection = scene->cam->GetProjectionMatrix();
