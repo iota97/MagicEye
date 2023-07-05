@@ -7,7 +7,6 @@
 \usepackage{longtable}
 \usepackage{graphicx}
 \usepackage[font=small,labelfont=bf]{caption}
-\graphicspath{ {Images/} }
 \hypersetup{
     colorlinks,
     citecolor=black,
@@ -100,7 +99,7 @@ In this document we discuss the algorithms, the choices and the implementation d
 The pipeline presented allow the rendering of autostereograms starting from a depth buffer that is always produces
 as a result on all classical rasterization rendering algorithms. More elaborated effect can be achieved if we supply as input also the color buffer and 
 the normal buffer.\\\\
-We will first explain what an autostereogram is and how it works from a psychological point of view. We will then discuss a general algorithm to create them.
+We will first briefly explain what an autostereogram is and how it works from a psychological point of view. We will then discuss a general algorithm to create them.
 We will then discuss the implementation detail of the project.\\\\
 It should be noted that the input needed for the autostereogram generation algorithm are produced as a result of most real-time rendering pipeline and this 
 mean that is possible to apply this technique to an already existent rendering pipeline.\\\\
@@ -111,15 +110,53 @@ dual quaternion skinning.\\\\
 We will see how the performance of this pipeline can be totally in the frame budget on most GPU buy may suffer on old laptop one while still
 providing 60 frames per second.
 
+\clearpage
 \section{Autostereogram}
 \subsection{What is an autostereogram}
-
-\subsection{How to see an autostereogram}
-
+A stereogram is a 2D image that creates the optical illusion of a 3D scene\footnote{https://en.wikipedia.org/wiki/Autostereogram}. Autostereograms are a particular kind of stereograms
+that create this illusion without requiring any additional equipment.\\\\
+Our brain is able to perceive depth because each eye receives a different image because they are in slightly different positions on one's head.
+We can exploit this behavior by producing one image with repeating patter causing and object to be in the right position from the point of view of each eye
+if the eye separation of the subject is the correct one.\\\\
+Note that it might take some practice before being able to control the eye separation and be able to see
+the optical illusion. For more information on some viewing technique one may take a look at: \url{https://www.hidden-3d.com/how_to_view_stereogram.php}.\\\\
+\begin{center}
+    \centering
+    \includegraphics[width=1.0\textwidth]{img/shark.png}
+    \captionof{figure}{Autostereogram of a shark}
+\end{center}
+\clearpage
 \subsection{Autostereogram rendering algorithm}
+To render an autostereogram we need first to understand the underling geometry.\\
+\begin{center}
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/geometry.png}
+    \captionof{figure}{The geometry of an autostereogram}
+\end{center}
+If the two points where the line of sight intercept the screen have the same color the depth of the 3D
+subject will be perceived.\\\\
+As we can see from the figure the two highlighted triangles have the same angles and as such they are similar.
+This means they are proportional, and so we can calculate the separation with the following equation.
+\[
+sep = \frac{eyesep \cdot featureZ}{featureZ + obsdist}
+\]
+The general method to create an autostereogram is the following\footnote{http://www.techmind.org/stereo/stech.html}:
+\begin{itemize}
+    \item Create a depth map of the scene.
+    \item For each horizontal line, moving from left to right, and for each point of the depth map link together all the pixel that will have the same color.
+    \item Assign to each point a random color making sure the linked one will have the same.
+\end{itemize}
 
 \subsection{Advanced effects}
-
+The choice of which color assign to a pixel allow for different effect.\\\\
+While it iss possible to use a completely random color is also possible use a texture pattern that will be repeated horizontally.\\\\
+It is also possible to highlight the edge of the objects or using a color based on the real object color.
+\begin{center}
+    \centering
+    \includegraphics[width=1.0\textwidth]{img/ship.png}
+    \captionof{figure}{Object color are used}
+\end{center}
+As one may expect this means objects will bleed horizontally to other pixels in a repeating fashion.
 \section{Scene management}
 \subsection{Handle multiple scenes}
 
