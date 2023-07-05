@@ -104,6 +104,25 @@ float rand(vec2 co) {
     return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
+void sort2(inout vec3 a0, inout vec3 a1) {
+    vec3 b0 = min(a0, a1);
+    vec3 b1 = max(a0, a1);
+    a0 = b0;
+    a1 = b1;
+}
+
+void sort(inout vec3 a0, inout vec3 a1, inout vec3 a2, inout vec3 a3, inout vec3 a4) {
+    sort2(a0, a1);
+    sort2(a3, a4);
+    sort2(a0, a2);
+    sort2(a1, a2);
+    sort2(a0, a3);
+    sort2(a2, a3);
+    sort2(a1, a4);
+    sort2(a1, a2);
+    sort2(a3, a4);
+}
+
 int index(vec2 co) {
     int width = bufferWidth-1;
     int height = bufferHeight-1;
@@ -212,7 +231,39 @@ subroutine (stereoPass) vec4 secondPass() {
     if (color[i].w != 0) {
         col = color[i].rgb/float(color[i].w);
     }
-    col = mix(col, random, 1.0-sceneColorStr);
+
+    vec2 texelSize = 1.0/textureSize(colorTex, 0);
+    vec2 co1 = UV[index(uv+vec2(1.0, 0.0)*texelSize)];
+    int i1 = index(co1);
+    vec3 col1 = vec3(0.0);
+    if (color[i1].w != 0) {
+        col1 = color[i1].rgb/float(color[i1].w);
+    }
+
+    vec2 co2 = UV[index(uv+vec2(-1.0, 0.0)*texelSize)];
+    int i2 = index(co2);
+    vec3 col2 = vec3(0.0);
+    if (color[i2].w != 0) {
+        col2 = color[i2].rgb/float(color[i2].w);
+    }
+
+    vec2 co3 = UV[index(uv+vec2(0.0, 1.0)*texelSize)];
+    int i3 = index(co3);
+    vec3 col3 = vec3(0.0);
+    if (color[i3].w != 0) {
+        col3 = color[i3].rgb/float(color[i3].w);
+    }
+
+    vec2 co4 = UV[index(uv+vec2(0.0, -1.0)*texelSize)];
+    int i4 = index(co4);
+    vec3 col4 = vec3(0.0);
+    if (color[i4].w != 0) {
+        col4 = color[i4].rgb/float(color[i4].w);
+    }
+
+    sort(col, col1, col2, col3, col4);
+
+    col = mix(col2, random, 1.0-sceneColorStr);
     float edgeFactor = bool(edge[i]) ? 1.0-edgeStr : 1.0;
     return vec4(col*edgeFactor, 1.0);
 }
