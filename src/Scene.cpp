@@ -236,7 +236,7 @@ SceneWindmill::SceneWindmill(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene
 
 void SceneWindmill::Process() {
 	Scene::Process();
-	objects[0].rotation.x += 10.0 * ctx->deltaTime;
+	objects[0].rotation.x += 10.0 * ctx->deltaTime * ctx->animSpeed;
 }
 
 SceneSpace::SceneSpace(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w, c) {
