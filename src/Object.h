@@ -12,7 +12,7 @@ struct Object {
 
     Model *model;
     GLuint texture;
-    GLfloat textureRepeat = 1.0;
+    GLfloat alphaMultiplier = 1.0;
 
     glm::vec3 specularColor = glm::vec3(1.0);
     float shininess = 500.0;

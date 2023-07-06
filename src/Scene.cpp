@@ -39,21 +39,18 @@ SceneStandard::SceneStandard(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene
 	obj.position = glm::vec3(-0.31, -5.44, -11.62);
 	obj.rotation = glm::vec3(0.00, 180.39, 0.00);
 	obj.scale = glm::vec3(76.25, 76.25, 76.25);
-	obj.textureRepeat = 1;
 	objects.push_back(obj);
 	obj.model = &models[1];
 	obj.texture = textures[0];
 	obj.position = glm::vec3(26.07, -3.94, -23.51);
 	obj.rotation = glm::vec3(0.00, 251.06, 0.00);
 	obj.scale = glm::vec3(2.54, 2.54, 2.54);
-	obj.textureRepeat = 1;
 	objects.push_back(obj);
 	obj.model = &models[2];
 	obj.texture = textures[0];
 	obj.position = glm::vec3(-28.37, -7.70, -22.26);
 	obj.rotation = glm::vec3(0.00, 107.19, 0.00);
 	obj.scale = glm::vec3(0.89, 0.89, 0.89);
-	obj.textureRepeat = 1;
 	objects.push_back(obj);
 }
 
@@ -87,70 +84,61 @@ SceneFairyHouse::SceneFairyHouse(SceneCamera *sc, GLFWwindow *w, Context *c) : S
 	obj.position = glm::vec3(-0.31, 0.53, 0.37);
 	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
 	obj.scale = glm::vec3(3.73, 3.73, 3.73);
-	obj.textureRepeat = 1;
 	objects.push_back(obj);
 	obj.model = &models[1];
 	obj.texture = textures[1];
 	obj.position = glm::vec3(-0.31, 0.53, 0.37);
 	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
 	obj.scale = glm::vec3(3.73, 3.73, 3.73);
-	obj.textureRepeat = 1;
 	objects.push_back(obj);
 	obj.model = &models[2];
 	obj.texture = textures[2];
 	obj.position = glm::vec3(-0.31, 0.53, 0.37);
 	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
 	obj.scale = glm::vec3(3.73, 3.73, 3.73);
-	obj.textureRepeat = 1;
 	objects.push_back(obj);
 	obj.model = &models[3];
 	obj.texture = textures[1];
 	obj.position = glm::vec3(-0.31, 0.53, 0.37);
 	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
 	obj.scale = glm::vec3(3.73, 3.73, 3.73);
-	obj.textureRepeat = 1;
 	objects.push_back(obj);
 	obj.model = &models[4];
 	obj.texture = textures[1];
 	obj.position = glm::vec3(-0.31, 0.53, 0.37);
 	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
 	obj.scale = glm::vec3(3.73, 3.73, 3.73);
-	obj.textureRepeat = 1;
 	objects.push_back(obj);
 	obj.model = &models[5];
 	obj.texture = textures[3];
 	obj.position = glm::vec3(-0.31, 0.53, 0.37);
 	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
 	obj.scale = glm::vec3(3.73, 3.73, 3.73);
-	obj.textureRepeat = 1;
 	objects.push_back(obj);
 	obj.model = &models[6];
 	obj.texture = textures[4];
 	obj.position = glm::vec3(-0.31, 0.53, 0.37);
 	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
 	obj.scale = glm::vec3(3.73, 3.73, 3.73);
-	obj.textureRepeat = 1;
 	objects.push_back(obj);
 	obj.model = &models[7];
 	obj.texture = textures[5];
 	obj.position = glm::vec3(-0.31, 0.53, 0.37);
 	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
 	obj.scale = glm::vec3(3.73, 3.73, 3.73);
-	obj.textureRepeat = 1;
 	objects.push_back(obj);
 	obj.model = &models[8];
 	obj.texture = textures[1];
 	obj.position = glm::vec3(-0.31, 0.53, 0.37);
 	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
 	obj.scale = glm::vec3(3.73, 3.73, 3.73);
-	obj.textureRepeat = 1;
 	objects.push_back(obj);
 	obj.model = &models[9];
 	obj.texture = textures[3];
+	obj.alphaMultiplier = 30.0f;
 	obj.position = glm::vec3(-0.31, 0.53, 0.37);
 	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
 	obj.scale = glm::vec3(3.73, 3.73, 3.73);
-	obj.textureRepeat = 1;
 	objects.push_back(obj);
 }
 
@@ -188,7 +176,6 @@ SceneFight::SceneFight(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w
 	obj.position = glm::vec3(-1.14, 1.03, 2.50);
 	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
 	obj.scale = glm::vec3(0.4);
-	obj.textureRepeat = 1;
 	obj.shininess = 200;
 	obj.specularFactor = 0.9;
 	objects.push_back(obj);
@@ -197,7 +184,6 @@ SceneFight::SceneFight(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w
 	obj.position = glm::vec3(-1.14, 1.03, 2.50);
 	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
 	obj.scale = glm::vec3(0.4);
-	obj.textureRepeat = 1;
 	objects.push_back(obj);
 }
 
@@ -216,21 +202,18 @@ SceneWindmill::SceneWindmill(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene
 	obj.position = glm::vec3(-0.31, 0.53, 0.37);
 	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
 	obj.scale = glm::vec3(2.35, 2.24, 2.35);
-	obj.textureRepeat = 1;
 	objects.push_back(obj);
 	obj.model = &models[1];
 	obj.texture = textures[0];
 	obj.position = glm::vec3(-0.31, 0.53, 0.37);
 	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
 	obj.scale = glm::vec3(2.35, 2.24, 2.35);
-	obj.textureRepeat = 1;
 	objects.push_back(obj);
 	obj.model = &models[2];
 	obj.texture = textures[0];
 	obj.position = glm::vec3(-0.31, 1.11, 0.37);
 	obj.rotation = glm::vec3(0.00, 0.00, 0.00);
 	obj.scale = glm::vec3(2.35, 2.50, 2.35);
-	obj.textureRepeat = 1;
 	objects.push_back(obj);
 }
 
@@ -263,7 +246,6 @@ SceneSpace::SceneSpace(SceneCamera *sc, GLFWwindow *w, Context *c) : Scene(sc, w
 	obj.position = glm::vec3(41.20, -4.71, -15.58);
 	obj.rotation = glm::vec3(343.61, 260.89, 5.68);
 	obj.scale = glm::vec3(2.29, 2.29, 2.29);
-	obj.textureRepeat = 1;
 	objects.push_back(obj);
 	obj.model = &models[1];
 	obj.texture = textures[1];

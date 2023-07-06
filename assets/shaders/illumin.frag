@@ -8,7 +8,7 @@ in vec2 uv;
 in vec3 vViewPosition;
 
 uniform sampler2D tex;
-uniform float repeat;
+uniform float alphaMultiplier;
 
 uniform float Ka;
 uniform float Kd;
@@ -22,7 +22,7 @@ subroutine vec3 illum();
 subroutine uniform illum illumModel;
 
 subroutine (illum) vec3 phong() {
-    vec3 albedo = texture(tex, uv*repeat).rgb;
+    vec3 albedo = texture(tex, uv).rgb;
     vec3 color = Ka*albedo;
     vec3 N = normalize(vNormal);
     vec3 L = normalize(lightDir);
@@ -42,7 +42,7 @@ subroutine (illum) vec3 phong() {
 }
 
 subroutine (illum) vec3 toon() {
-    vec3 albedo = texture(tex, uv*repeat).rgb;
+    vec3 albedo = texture(tex, uv).rgb;
     vec3 color = Ka*albedo;
     vec3 N = normalize(vNormal);
     vec3 L = normalize(lightDir);
@@ -62,6 +62,6 @@ subroutine (illum) vec3 toon() {
 }
 
 void main() {
-  colorFrag[0] = vec4(round(illumModel()*255.0*pow(colorResolution, 3.0))/(255.0*pow(colorResolution, 3.0)), 1.0);
+  colorFrag[0] = vec4(round(illumModel()*255.0*pow(colorResolution, 3.0))/(255.0*pow(colorResolution, 3.0)), alphaMultiplier);
   colorFrag[1] = vec4(vNormal, 1.0);
 }

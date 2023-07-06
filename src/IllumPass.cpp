@@ -39,7 +39,7 @@ void IllumPass::SetupScene(Shader &shader, Scene *scene) {
 void IllumPass::SetupObject(Shader &shader, Scene *scene, Object &obj) {
     // Object uniform location
     GLint textureLocation = glGetUniformLocation(shader.Program, "tex");
-    GLint repeatLocation = glGetUniformLocation(shader.Program, "repeat");
+    GLint alphaMultiplierLocation = glGetUniformLocation(shader.Program, "alphaMultiplier");
     GLint specularColorLocation = glGetUniformLocation(shader.Program, "specularColor");
     GLint shininessLocation = glGetUniformLocation(shader.Program, "shininess");
     GLint kdLocation = glGetUniformLocation(shader.Program, "Kd");
@@ -51,7 +51,7 @@ void IllumPass::SetupObject(Shader &shader, Scene *scene, Object &obj) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, obj.texture);
     glUniform1i(textureLocation, 0);
-    glUniform1f(repeatLocation, obj.textureRepeat);
+    glUniform1f(alphaMultiplierLocation, obj.alphaMultiplier);
 
     // Transform matrix (match Unity)
     glm::mat4 modelMatrix(1.0f);
