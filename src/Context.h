@@ -32,5 +32,5 @@ struct Context {
     float edgeThreshold = 1.0;
     bool edgeNormal = true;
     bool staticPattern = true;
-    int pattern = 5;
+    int pattern = 4;
 };

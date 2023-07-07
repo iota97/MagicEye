@@ -52,8 +52,7 @@ StereoPass::StereoPass(Context *c) : shader("assets/shaders/stereogram.vert", "a
     pattern.push_back(LoadTexture("assets/textures/patterns/pat1.png"));
     pattern.push_back(LoadTexture("assets/textures/patterns/pat2.png"));
     pattern.push_back(LoadTexture("assets/textures/patterns/pat3.png"));
-    pattern.push_back(LoadTexture("assets/textures/patterns/pat4.png"));
-    pattern.push_back(LoadTexture("assets/textures/patterns/pat5.png"));
+    pattern.push_back(LoadTexture("assets/textures/patterns/anim0.png"));
 }
 
 StereoPass::~StereoPass() {
@@ -141,6 +140,9 @@ void StereoPass::execute(GLuint colorTex, GLuint depthTex, GLuint normalTex) {
             break;
         case 1:
             index[patternLocation] = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, "perlinNoiseRGB");
+            break;
+        case 6:
+            index[patternLocation] = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, "animatedPattern");
             break;
         default:
             index[patternLocation] = glGetSubroutineIndex(shader.Program, GL_FRAGMENT_SHADER, "texturePattern");

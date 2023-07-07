@@ -194,7 +194,15 @@ subroutine (randomPattern) vec3 perlinNoiseRGB(vec2 co) {
 } 
 
 subroutine (randomPattern) vec3 texturePattern(vec2 co) {
-    return texture(randomTexture, co*6.0+vec2(cos(time*0.2), sin(time*0.2))).rgb;
+    return texture(randomTexture, co*6.0+0.3*vec2(cos(time*0.5), sin(time*0.5))).rgb;
+} 
+
+subroutine (randomPattern) vec3 animatedPattern(vec2 co) {
+    float t = mod(round(time*16.0), 64.0);
+    float x = mod(t, 8.0);
+    float y = floor(t*0.125);
+    vec2 coord = vec2(x, y) + mod(co*8.0, 1);
+    return texture(randomTexture, coord*0.125).rgb;
 } 
 
 subroutine (stereoPass) vec4 firstPass() {

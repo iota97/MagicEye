@@ -70,7 +70,7 @@ void GUI::RenderMenu() {
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
     ImGui::Text("Pattern settings");
-    const char* pattern[] = {"Perlin noise", "Perlin noise (RGB)", "RGB noise", "Colorful", "Cubes", "Symbols", "Wavy"};
+    const char* pattern[] = {"Perlin noise", "Perlin noise (RGB)", "RGB noise", "Colorful", "Symbols", "Wavy", "Water (animated)"};
     ImGui::Combo("Pattern", &ctx->pattern, pattern, IM_ARRAYSIZE(pattern));
     ImGui::SameLine();
     ImGui::Checkbox("Static", &ctx->staticPattern);
