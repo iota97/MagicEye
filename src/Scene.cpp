@@ -3,6 +3,9 @@
 
 void Scene::Process() {
     cam->Process();
+    for (auto &obj : skinned_objects) {
+        obj.anim->UpdateAnimation(ctx->deltaTime*ctx->animSpeed);
+    }
 }
 
 Scene::Scene(SceneCamera *sc, GLFWwindow *w, Context *c) : cam(sc), window(w), ctx(c) {

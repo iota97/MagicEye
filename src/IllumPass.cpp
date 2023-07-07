@@ -95,7 +95,6 @@ void IllumPass::execute(Scene *scene) {
         glUniformSubroutinesuiv(GL_VERTEX_SHADER, n, &index[0]);
 
         for (auto &obj : scene->skinned_objects) {
-            obj.anim->UpdateAnimation(ctx->deltaTime*ctx->animSpeed);
             SetupObject(skinningShader, scene, obj);
 
             auto transforms = obj.anim->GetFinalBoneMatrices();

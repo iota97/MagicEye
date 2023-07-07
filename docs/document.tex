@@ -166,7 +166,7 @@ It is also possible to highlight the edge of the objects or using a color based 
 \begin{center}
     \centering
     \includegraphics[width=1.0\textwidth]{img/ship.png}
-    \captionof{figure}{Object color are used}
+    \captionof{figure}{Autostereogram where object color are used}
 \end{center}
 As one may expect this means objects will bleed horizontally to other pixels in a repeating fashion.
 \section{Scene management}
@@ -212,7 +212,8 @@ void main() {
 To hide the missing part on right and left
 the buffer was cleared with \textbf{glClear} with the clear color set as the loading screen image background color.\\\\
 The \textbf{SceneManager} also forward the call to the method process to the current loaded scene to allow the scene
-to be updated with the current \textbf{deltaTime}.
+to be updated based on the \textbf{deltaTime} that affect objects and animation, and the input received from the user
+that affect the camera position and orientation.
 
 \subsection{Assets loading}
 \textbf{Scene} constructor will set the camera position, the light direction, the skybox, load all the required models and texture
@@ -276,14 +277,81 @@ The variables affected by the GUI are placed in a struct \textbf{Context} that i
 passed as a pointer to most objects in the application. This avoids proliferation of global variables for data 
 that need to be shader by multiple objects.
 
-\section{Rendering}
-\subsection{Illumination model}
+\section{Classical rendering}
+\subsection{Rendering class}
+The \textbf{Render} class is responsible for setting up the general rendering state, such as back face culling, creating
+the FBO, keeping them of the correct size when the window resize and calculate the delta time.\\\\
+The \textbf{Render} holds the objects responsible for each render pass and call them in the correct order on the appropriate
+framebuffer.
+\begin{lstlisting}[caption={Main rendering loop},captionpos=b]
+// Illumination pass
+glViewport(0, 0, ctx->width, ctx->height);
+glBindFramebuffer(GL_FRAMEBUFFER, ctx->stereoRendering ? FBO:0);
+glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-\subsection{Toon shading}
+GLenum buffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+glDrawBuffers(2, buffers);
+illumPass.execute(scene);
 
-\subsection{Skybox}
+// SkyboxPass
+skyboxPass.execute(scene, ctx);
 
-\subsection{Autostereogram}
+// Stereogram pass
+glDrawBuffers(1, buffers);
+if (ctx->stereoRendering) {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    stereoPass.execute(color, depth, normal);
+}
+
+// UI
+if (ctx->showMenu) {
+    gui.RenderMenu();
+}
+
+// Swap buffer
+glfwSwapBuffers(window);
+glfwSwapInterval(ctx->vSync);
+\end{lstlisting}
+\subsection{Illumination pass}
+The illumination pass set up the view and projection matrix based as provided by the \textbf{SceneCamera} and then iterate
+every object in the scene setting up its model matrix, its material uniform, binding its texture and drawing its model.\\\\
+The illumination model is Blinn-Phong, as object blends one over each other more sophisticated illumination model give little
+visible difference and so a simple and fast model was preferred for this project.\\\\
+A different subroutine can be called to apply toon shading. This simply use \textbf{step} to quantize the illumination.
+\begin{lstlisting}[caption={Toon shading subroutine version},captionpos=b]
+[...]
+float lambertian = step(0.5, max(dot(lightDir, normal), 0.0));
+[...]
+float specular = step(0.2, pow(specAngle, shininess));
+[...]
+\end{lstlisting}
+\begin{center}
+    \centering
+    \includegraphics[width=1.0\textwidth]{img/toon.png}
+    \captionof{figure}{Toon shaded teapot}
+\end{center}
+It is also possible to quantize the color resolution to apply a more cartoonish effect. This can create a lot
+of banding. The result, once the pixel are blended over each other for the stereogram rendering, is still quite nice.\\\\
+During this pass we also save the view space normal on a texture, they will be used for edge detection in the stereogram
+rendering pass.
+
+\subsection{Skybox pass}
+The skybox pass draws the skybox after all the other models were drawn to avoid processing fragment that will belong to an object
+in the scene.\\\\
+The only difference from a standard skybox rendering is that the alpha component of the fragment is set based
+on the GUI setting \textbf{Skybox influence}. This does not affect the rendering color, as alpha blending is not enabled, but
+is used for the stereogram pass to achieve some advanced effects.
+
+\section{Autostereogram rendering}
+\subsection{Main algorithm}
+
+\subsection{Pattern}
+
+\subsection{Scene color}
+
+\subsection{Edge detection}
+
+\subsection{Numerical errors}
 
 \section{Skeletal animation}
 
