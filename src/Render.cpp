@@ -2,8 +2,8 @@
 
 static Context *context;
 void framebuffer_size_callback(GLFWwindow* window, int w, int h) {
-    context->width = w;
-    context->height = h;
+    context->width = w > 1 ? w : 1;
+    context->height = h > 1 ? h : 1;
 }
 
 Render::Render(GLFWwindow *w, Context *c) : ctx(c), window(w), illumPass(ctx), stereoPass(ctx), gui(window, ctx) {
