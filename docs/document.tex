@@ -344,14 +344,122 @@ is used for the stereogram pass to achieve some advanced effects.
 
 \section{Autostereogram rendering}
 \subsection{Main algorithm}
+The autostereogram rendering is executed in 2 passes each one rendering a fullscreen quad.\\\\
+In the first pass we sample the depth buffer from the current texel moving to the left border to link
+all the texel that will need to have the same color in the final rendering.
+\begin{lstlisting}[caption={Autostereogram depth sampling},captionpos=b]
+vec2 currCoord = uv;
+for(int i = 0; i < 32; i++) {
+    float depth = sampleDepth(currCoord);
+    float sep = eyeSep*depth/(depth + obsDistance);
+    if(currCoord.x < 0.0)
+       break;
+    currCoord.x -= sep;
+}
+currCoord.x = mod(currCoord.x, 1.0);
+\end{lstlisting}
+Using this method we simply need to assign the same color to each texel having the same \textbf{currCoord}.\\\\
+The depth sample from the depth buffer is not linear and should be linearized to have the correct results.
+Sadly autostereogram can provide only a limited range of depth, linearizing this would require to clamp the max depth
+to a really close value. To allow some perception of the depth difference of far away object it was preferred to not linearize
+the depth making close object more visibly 3D while keeping some little 3D effect for far away one. This can be also made even less linear
+as the depth value get changed using an exponential function having as the exponent be GUI setting \textbf{depth strength}. Note that value too high
+cause glitches to close object, while low values reduce the 3D effect.\\\\
+To allow the scene color to be used we also store the current texel color in a SSBO as we will discuss later, for this
+reason a second pass is required after a barrier to ensure all data written to the SSBO will be read correctly in the second pass.\\\\
+The value of \textbf{currCoord} will be also needed in the second pass, to avoid computing it again we store it in another SSBO.\\\\
+We also detect if the current texel is a edge and store this information in the 3rd and last SSBO, we will better discuss this later.
 
 \subsection{Pattern}
+In the second pass we assign the texel color sampling a pattern based on the value of \textbf{currCoord}.\\\\
+The application support random generated patter with perlin noise, either RGB or grayscale. The perlin noise
+can also take into account the current frame time to make it animated.\\\\
+Another option that avoid the expensive perlin noise generation is to sample a texture. To animate the texture pattern
+we just move the UV coordinate a bit each frame.\\\\
+The last option is to use an animated texture pattern, in this case for simplicity all frame was placed in a single texture
+and the code sample in the correct position based on the current time. As a pattern texture is only 256x256 pixel having
+64 frames in a texture only requires a 2048x2048 texture that is totally manageable by the GPU.
 
 \subsection{Scene color}
+During the first pass we save the texel color in a SSBO. As many texel will have the same \textbf{currCoord} we will
+need to blend them together and use the average as the final color. This scene color can then be mixed with the color
+generated from the pattern.\\\\
+To average the color, in the first pass, we atomically add each color in the SSBO using the alpha channel as a counter of how many texel
+were added for that value of \textbf{currCoord}. In the second pass we simply divide the RGB channels by the alpha to get the correct values back.
+Note that is possible to do atomic operation only on integer scalar values.
+\begin{lstlisting}[caption={First pass color blending},captionpos=b]
+UV[index(uv)] = currCoord;
+vec4 col = texture(colorTex, uv);
+col.rgb *= col.a;
+int i = index(currCoord);
+atomicAdd(color[i].r, int(col.r*4096));
+atomicAdd(color[i].g, int(col.g*4096));
+atomicAdd(color[i].b, int(col.b*4096));
+atomicAdd(color[i].a, int(col.a*4096));
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Second pass color blending},captionpos=b]
+vec2 co = UV[index(uv)];
+int i = index(co);
+vec3 random = pattern(co);
+vec3 col = vec3(0.0);
+if (color[i].w != 0) {
+    col = color[i].rgb/float(color[i].w);
+}
+\end{lstlisting}
+In the previous code \textbf{index} is a helper function to get the 1D array index from 2D coordinates.\\\\
+It is also possible to use this alpha as a weight to give different importance to some object in the scene. For example the skybox might have a low weight
+making it bleed over other pixel only if there was no other important object that should bleed over that pixel.
+To have alpha value greater than 1 the FBO color attachment texture should be declared using a not clamped format such as GL\_RGBA32F.
+\begin{center}
+    \centering
+    \includegraphics[width=1.0\textwidth]{img/dance.png}
+    \captionof{figure}{Dancer autostereogram}
+\end{center}
+Here we can see how the blue of the skybox does not blend with the colors of the dancing goblin as it have a weight of 0.01 as compared to the
+1.0 of the dancer.
 
 \subsection{Edge detection}
+To enchant the autostereogram sharpness we can add the object edged to the image.\\\\
+In the first pass we detect the edge using Sobel either on the scene color or on the scene view space normals. The second case give better results 
+but is unable to detect edges in the object texture.\\\\
+Once we have detected the edge we store this information in a SSBO. In the second pass we check if there was an edge in any texel having
+that particular \textbf{currCoord}, if it is the case we render a darker color.
+\begin{center}
+    \centering
+    \includegraphics[width=1.0\textwidth]{img/edge.png}
+    \captionof{figure}{Edge detection on normals}
+\end{center}
 
 \subsection{Numerical errors}
+Numerical precision can lead to graphical artefacts.
+\begin{center}
+    \centering
+    \includegraphics[width=1.0\textwidth]{img/pixel.png}
+    \captionof{figure}{Numerical error cause wrong pixel colors}
+\end{center}
+In this example the pixel 0, 1 and 2 belong to the skybox, when
+the pixel 3, 4 and 5 belonging to an object blend with them, due little numerical
+errors the pixel 4 calculate its \textbf{currCoord} to be the same as pixel 0 rather
+than pixel 1. As a result the pixel 1 will keep the skybox color causing a visible
+wrongly colored pixel.
+
+\begin{center}
+    \centering
+    \includegraphics[width=1.0\textwidth]{img/error.png}
+    \captionof{figure}{Numerical error artefact}
+\end{center}
+
+This problem looks like a salt and pepper noise, so we can use a median filter to mitigate it. For each texel
+we sample also the 2 texels above and below and the 2 texels on the side. We then sort the 5 texel values and take
+the median one.
+
+\begin{center}
+    \centering
+    \includegraphics[width=1.0\textwidth]{img/fix.png}
+    \captionof{figure}{Median filtering result}
+\end{center}
+The result is not perfected but greatly improved, mixing with the pattern also help to hide the artefacts.
 
 \section{Skeletal animation}
 
