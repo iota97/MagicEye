@@ -8,6 +8,8 @@
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{amsfonts}
+\usepackage{amsmath}
 \lstset { %
     language=C++,
     backgroundcolor=\color{black!5}, % set backgroundcolor
@@ -464,8 +466,58 @@ The result is not perfected but greatly improved, mixing with the pattern also h
 \section{Skeletal animation}
 
 \subsection{Linear blend skinning}
+Linear blend skinning code was based on Learn OpenGL implementation. The animation is loaded from the mesh file using assimp.
+At each frame we compute the current bone trasformations interpolating between keyframes. To get the correct results rotation
+need to be interpolated using quaternions. The final trasform for each bone is then computed comulating each bone trasform with the base
+trasform of each bone. The final transforms are sent to the GPU as uniform for the vertex shader.\\\\
+To achieve better results blend skinning is used. Each vertex is associated with up to 4 bone
+of the skeleton. For each of these bone there is a weight that encode how much the vertex is affected by that bone.
+In the vertex shader we interpolate the bone final transforms with the weights and then apply the result to the vertex to get
+the vertex position in object space.\\\\
+With linear blend skinning we represent the trasformations as matrices and we interpolate linearly between them.
+This approach mostly work, but does not preserve the mesh volume and can lead to some artefacts such as candy wrap.
 
 \subsection{Dual quaternion skinning}
+An alternative approach that preserve the volumes is dual quaternion skinning. For this we represent the bone final trasformations as dual quaternion
+and interpolate between them.\\\\
+Note that dual quaternions can only encode rototraslations and scaling need to be interpolated on his own. While most animation have no need for scaling
+it seem that most animation loaded from various assets have a constant scaling applied to bones.\\\\
+A dual quaternion is a number in the form:
+\[
+    p + \epsilon q \text{ where } p, q \in \mathbb{H}\\\\
+    \epsilon \neq 0, \epsilon^2 = 0
+\]
+A rototraslations is expressed as a unitary dual quaternion:
+\[
+    \|p + \epsilon q\| = 1 \iff \|p\| = 1 \land p \cdot q = 0
+\]
+A rotation around an axis $(x, y, z)$ of an angle $\theta$ is expressed as with normal quaternions:
+\[
+    \cos(\frac{\theta}{2})+\sin(\frac{\theta}{2})(xi + yj + zk)
+\]
+A translation $(x, y, z)$ is expressed as:
+\[
+    1+\frac{\epsilon}{2}(xi + yj + zk)
+\]
+A point $(x, y, z) \in \mathbb{E}^3$ is expressed as a dual quaternion like this:
+\[
+    1 + \epsilon xi + \epsilon yj + \epsilon zk
+\]
+To apply a rototraslation expressed by $t$ to the point $a$:
+\[
+    a' = ta\overline{t} \text{ where } \overline{p + \epsilon q} = \overline{p} - \epsilon \overline{q}
+\]
+To obtain the rotation and the translation expressed by the final transform matrix the method \textbf{glm::decompose} was used.
+The dual quaternion is then computed and sent to the GPU as uniform.\\\\
+In the shader we interpolate the dual quaternion linearly (taking into account the shortest path), normalize the result and then apply the it to the vertex position.
+To normalize a dual quaternion we first divide both $p$ and $q$ by $\|p\|$ and then subtract from $q$ the value of $(p \cdot q)p$.
+\begin{center}
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/dq.png}
+    \captionof{figure}{Dual quaternions skinning comparation}
+\end{center}
+To calculate the vertex normal we usually need the inverse of the transpose of the transformation matrix. As dual quaternions only encode rototranslation
+we can apply the dual quaternion as it is.
 
 \section{Performance evaluation}
 
