@@ -503,9 +503,9 @@ A point $(x, y, z) \in \mathbb{E}^3$ is expressed as a dual quaternion like this
 \[
     1 + \epsilon xi + \epsilon yj + \epsilon zk
 \]
-To apply a rototraslation expressed by $t$ to the point $a$:
+To apply a rototraslation to the point $a$:
 \[
-    a' = ta\overline{t} \text{ where } \overline{p + \epsilon q} = \overline{p} - \epsilon \overline{q}
+    a' = (p + \epsilon q)a(\bar{p} - \epsilon \bar{q})
 \]
 To obtain the rotation and the translation expressed by the final transform matrix the method \textbf{glm::decompose} was used.
 The dual quaternion is then computed and sent to the GPU as uniform.\\\\
@@ -520,7 +520,38 @@ To calculate the vertex normal we usually need the inverse of the transpose of t
 we can apply the dual quaternion as it is.
 
 \section{Performance evaluation}
+The performances were tested on a desktop with a GTX 1060 and a laptop with a Radeon Vega 8.
+\begin{center}
+    \begin{tabular}{||c c c c||} 
+     \hline
+     GPU & Resolution & Stereogram rendering & Frame time (ms) \\
+     \hline\hline
+     GTX 1060 & 720p & Enabled & 1.8 \\ 
+     \hline
+     GTX 1060 & 720p & Disabled & 0.3 \\ 
+     \hline
+     GTX 1060 & 1080p & Enabled & 4.6 \\ 
+     \hline
+     GTX 1060 & 1080p & Disabled & 0.4 \\ 
+     \hline
+     Vega 8 & 720p & Enabled & 6.6 \\ 
+     \hline
+     Vega 8 & 720p & Disabled & 1.0 \\ 
+     \hline
+     Vega 8 & 1080p & Enabled & 14.8 \\ 
+     \hline
+     Vega 8 & 1080p & Disabled & 1.5 \\ 
+     \hline    
+    \end{tabular}
+    \captionof{table}{Performance analysis}
+\end{center}
+As we can see the autostereogram rendering pass is quite taxing on the GPU, it is still
+fast enough for real time rendering, especially on modern desktop GPU. 
 
 \section{Conclusion}
-
+This project shows the potential and the limits of autostereogram real time rendering.\\\\
+Performance wise it is fast enough on more recent GPU, but still slow on old desktop GPU and laptop GPU.\\\\
+The depth effect have a limited range requiring some setting configuration to achieve the best result in each scene.\\\\
+Using the scene color and edge detection improve the visual result but can lead to glitches and rendering artefacts.\\\\
+In the end the 3D effect work nice, but is subject to many problems and limitation.
 \end{document}
