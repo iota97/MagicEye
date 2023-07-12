@@ -487,7 +487,7 @@ Note that dual quaternions can only encode rototraslations and scaling need to b
 it seems that most animation loaded from various assets have a constant scaling applied to the bones.\\\\
 A dual quaternion is a number in the form:
 \[
-    p + \epsilon q \text{ where } p, q \in \mathbb{H}\\\\
+    p + \epsilon q \text{ where } p, q \in \mathbb{H},
     \epsilon \neq 0, \epsilon^2 = 0
 \]
 A rototraslations is expressed as a unitary dual quaternion:
@@ -512,13 +512,16 @@ To apply a rototraslation to the point $a$:
 \]
 To obtain the rotation and the translation expressed by the final transform matrix the method \textbf{glm::decompose} was used.
 The dual quaternion is then computed and sent to the GPU as uniform.\\\\
-In the shader we interpolate the dual quaternions linearly (taking into account the shortest path), normalize the result and then apply it to the vertex position.
-To normalize a dual quaternion we first divide both $p$ and $q$ by $\|p\|$ and then subtract from $q$ the value of $(p \cdot q)p$.
+The dual quaternion computation does not use neither \textbf{glm::quat} or \textbf{glm::dualquat}, the first because the multiplication returns a normalized 
+result that is fine when using quaterion for rotation but does not work for dual quaterion operation; the second one because the class is completely lacking
+of any useful methods needed by the application.
 \begin{center}
     \centering
     \includegraphics[width=0.8\textwidth]{img/dq.png}
     \captionof{figure}{Dual quaternions skinning comparison}
 \end{center}
+In the shader we interpolate the dual quaternions linearly (taking into account the shortest path), normalize the result and then apply it to the vertex position.
+To normalize a dual quaternion we first divide both $p$ and $q$ by $\|p\|$ and then subtract from $q$ the value of $(p \cdot q)p$.\\\\
 To calculate the vertex normal we usually need the inverse of the transpose of the transformation matrix. As dual quaternions only encode rototranslation
 we can apply the dual quaternion as it is.
 
@@ -552,9 +555,9 @@ As we can see the autostereogram rendering pass is quite taxing on the GPU, it i
 fast enough for real time rendering, especially on modern desktop GPU. 
 
 \section{Conclusion}
-This project shows the potential and the limits of autostereogram real time rendering.\\\\
-Performance wise it is fast enough on more recent GPU, but still slow on old desktop GPU and laptop GPU.\\\\
-The depth effect have a limited range requiring some setting configuration to achieve the best result in each scene.\\\\
+This project shows the potential and the limits of autostereogram real time rendering.
+Performance wise it is fast enough on more recent GPU, but still slow on old desktop GPU and laptop GPU.
+The depth effect have a limited range requiring some setting configuration to achieve the best result in each scene.
 Using the scene color and edge detection improve the visual result but can lead to glitches and rendering artefacts.\\\\
-In the end the 3D effect work nice, but is subject to many problems and limitation.
+In the end the 3D effect work nice, but it is subject to many problems and limitation.
 \end{document}
