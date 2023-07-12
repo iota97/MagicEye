@@ -103,6 +103,7 @@
 
 \clearpage
 \tableofcontents{}
+\clearpage
 \listoffigures
 \listoftables
 \lstlistoflistings
@@ -110,30 +111,31 @@
 
 \section{Abstract}
 In this document we discuss the algorithms, the choices and the implementation details of a real-time autostereogram rendering pipeline built with OpenGL 4.3.\\\\
-The pipeline presented allow the rendering of autostereograms starting from a depth buffer that is always produces
-as a result on all classical rasterization rendering algorithms. More elaborated effect can be achieved if we supply as input also the color buffer and 
+The pipeline presented allows the rendering of autostereograms starting from a depth buffer that is always produces
+as a result on all classical rasterization rendering algorithms. More elaborated effects can be achieved if we supply as input also the color buffer and 
 the normal buffer.\\\\
-We will first briefly explain what an autostereogram is and how it works from a psychological point of view. We will then discuss a general algorithm to create them.
-We will then discuss the implementation detail of the project.\\\\
+We will first briefly explain what an autostereogram is and how it works from a psychological point of view. 
+We will then discuss a general algorithm to create them and the implementation detail of the project.\\\\
 It should be noted that the input needed for the autostereogram generation algorithm are produced as a result of most real-time rendering pipeline and this 
-mean that is possible to apply this technique to an already existent rendering pipeline.\\\\
-For this project we made a simple rendering pipeline using Blinn-Phong illumination model, as we will see more sophisticated model give little gain in 
+means that is possible to apply this technique to an already existing rendering pipeline.\\\\
+For this project we use the simple Blinn-Phong illumination model, as we will see more sophisticated model give little gain in 
 the final result.\\\\
-The project also implements blend skinning for skeletal animation, we will discuss the implementation and the difference between linear blend skinning and
+The project also implements blend skinning for skeletal animation, we will discuss the implementation and the differences between linear blend skinning and
 dual quaternion skinning.\\\\
-We will see how the performance of this pipeline can be totally in the frame budget on most GPU buy may suffer on old laptop one while still
+We will see how the performance of this pipeline can be totally in the frame budget on most GPU, but may suffer on old laptop one while still
 providing 60 frames per second.
 
 \clearpage
 \section{Autostereogram}
 \subsection{What is an autostereogram}
-A stereogram is a 2D image that creates the optical illusion of a 3D scene\footnote{https://en.wikipedia.org/wiki/Autostereogram}. Autostereograms are a particular kind of stereograms
-that create this illusion without requiring any additional equipment.\\\\
-Our brain is able to perceive depth because each eye receives a different image because they are in slightly different positions on one's head.
-We can exploit this behavior by producing one image with repeating patter causing and object to be in the right position from the point of view of each eye
+A stereogram is a 2D image that creates the optical illusion of a 3D scene\footnote{https://en.wikipedia.org/wiki/Autostereogram}.
+Autostereograms are a particular kind of stereograms
+that creates this illusion without requiring any additional equipment.\\\\
+Our brain is able to perceive depth as each eye receives a different image because they are in slightly different positions on one's head.
+We can exploit this behavior by producing one image with repeating patter causing an object to be in the right position from the point of view of each eye
 if the eye separation of the subject is the correct one.\\\\
 Note that it might take some practice before being able to control the eye separation and be able to see
-the optical illusion. For more information on some viewing technique one may take a look at: \url{https://www.hidden-3d.com/how_to_view_stereogram.php}.\\\\
+the optical illusion. For more information on some viewing techniques one may take a look at: \url{https://www.hidden-3d.com/how_to_view_stereogram.php}.\\\\
 \begin{center}
     \centering
     \includegraphics[width=1.0\textwidth]{img/shark.png}
@@ -162,9 +164,9 @@ The general method to create an autostereogram is the following\footnote{http://
 \end{itemize}
 
 \subsection{Advanced effects}
-The choice of which color assign to a pixel allow for different effect.\\\\
+The choice of which color assign to a pixel allow for different effects.\\\\
 It is possible to use a completely random color, but is also possible use a texture pattern that will be repeated horizontally.\\\\
-It is also possible to highlight the edge of the objects or using a color based on the real object color.
+It is also possible to highlight the edge of the objects or using a color based on the color of the object in the scene.
 \begin{center}
     \centering
     \includegraphics[width=1.0\textwidth]{img/ship.png}
@@ -176,10 +178,10 @@ As one may expect this means objects will bleed horizontally to other pixels in 
 The project requires different scenes to be loaded when selected from the GUI.\\\\
 To achieve this the class \textbf{SceneManager} is responsible for loading the correct scene and unloading the old one
 freeing any no longed used resources.\\\\
-The \textbf{SceneManager} class hold a polymorphic pointer to a class \textbf{Scene}, when asked to load a new one
+The \textbf{SceneManager} class holds a polymorphic pointer to a class \textbf{Scene}, when asked to load a new one
 the current one is deleted and the old one is instanced creating a subclass of type \textbf{Scene}.\\\\
-This mean there is a subclass of \textbf{Scene} for every scene in the project. This method in general does not
-scale well, but for a project of this scale loading a scene specification from an asset file was considered overengineering.
+This means there is a subclass of \textbf{Scene} for every scene in the project. This method in general does not
+scale well, but for a project of this size loading a scene specification from an asset file was considered overengineering.
 It should be noted that if the scene was loaded from a file we could not use the polymorphic nature of the class
 \textbf{Scene} to override its method \textbf{Update}. In this situation we would be required to support scripting in the
 scene with something like Lua, again this was considered overengineer.\\\\
@@ -218,8 +220,8 @@ to be updated based on the \textbf{deltaTime} that affect objects and animation,
 that affect the camera position and orientation.
 
 \subsection{Assets loading}
-\textbf{Scene} constructor will set the camera position, the light direction, the skybox, load all the required models and texture
-and set all the object in the scene with the correct position and orientation.\\\\
+\textbf{Scene} constructor will set the camera position, the light direction, the skybox, load all the required models and textures
+and set all the objects in the scene with the correct position and orientation.\\\\
 Models and textures are loaded into two different \textbf{std::vector} and only their pointer are stored in the object struct.
 This allows to load shader models and textures only once.\\\\
 \textbf{Assimp} was used to load models and \textbf{stb\_image} to load textures. Both these code path
@@ -245,10 +247,10 @@ struct Object {
 \end{lstlisting}
 The rotation is expressed as Euler angles. This is not the best representation for rotation in video games and quaternion
 give simpler cumulation and interpolation formulas. Euler angles was preferred for their easier setup without a visual
-scene editor, again to avoid unneeded overengineering.\\\\
-The float \textbf{alphaMultiplier} is a special value that affect the alpha component of the fragment.
-This is used for some advanced effect during the stereogram rendering and will be discussed later.\\\\
-Skinned Object are a subclass Object holding the skinned model and the animator. Note that in C++ struct and class
+scene editor and again to avoid unneeded overengineering.\\\\
+The float \textbf{alphaMultiplier} is a special value that affects the alpha component of the fragments.
+This is used for some advanced effects during the stereogram rendering and will be discussed later.\\\\
+Skinned Object are a subclass of \textbf{Object} holding the skinned model and the animator. Note that in C++ struct and class
 are basically the same thing as the only difference is that by default struct members are public, whereas they are private in classes.
 \begin{lstlisting}[caption={SkinnedObject struct},captionpos=b]
 struct SkinnedObject : public Object {
@@ -262,14 +264,14 @@ Camera and input management is based on code written during lab lectures. The \t
 an object of type \textbf{Camera} as it was written during the lab lectures.\\\\
 As only the camera is affected by user input, beside GUI, the \textbf{SceneCamera} class also manage the input
 using the \textbf{glfw} library.\\\\
-The \textbf{SceneCamera} camera is created by the \textbf{SceneManager} and passed to the \textbf{Scene} on
-their creation. This not only reduce unneeded object creation and destruction, but most importantly this allows
+The \textbf{SceneCamera} is created by the \textbf{SceneManager} and passed to the \textbf{Scene} on
+their creation. This not only reduces unneeded objects creation and destruction, but most importantly this allows
 the constructor of \textbf{SceneCamera} to register the \textbf{glfw} callback before \textbf{ImGUI} register its own.
-This seems to workarounds a bug with \textbf{ImGUI} from becoming unresponsive when the window lose focus on Linux.  
+This seems to workarounds a bug with \textbf{ImGUI} becoming unresponsive when the window loses focus on Linux.  
 
 \section{GUI}
-The GUI menus was build with \textbf{ImGUI}. The class \textbf{GUI} is responsable for creating and destroying the
-\textbf{ImGUI} context as well as render all the GUI when the method \textbf{RenderMenu} is called.
+The GUI menu was build with \textbf{ImGUI}. The class \textbf{GUI} is responsible for creating and destroying the
+\textbf{ImGUI} context as well as rendering all the GUI when the method \textbf{RenderMenu} is called.
 \begin{center}
     \centering
     \includegraphics[width=0.6\textwidth]{img/gui.png}
@@ -277,14 +279,14 @@ The GUI menus was build with \textbf{ImGUI}. The class \textbf{GUI} is responsab
 \end{center}
 The variables affected by the GUI are placed in a struct \textbf{Context} that is created in the \textbf{main} and
 passed as a pointer to most objects in the application. This avoids proliferation of global variables for data 
-that need to be shader by multiple objects.
+that need to be shader across multiple objects.
 
 \section{Classical rendering}
 \subsection{Rendering class}
 The \textbf{Render} class is responsible for setting up the general rendering state, such as back face culling, creating
-the FBO, keeping them of the correct size when the window resize and calculate the delta time.\\\\
-The \textbf{Render} holds the objects responsible for each render pass and call them in the correct order on the appropriate
-framebuffer.
+the FBO, keeping them of the correct size when the window resize and calculating the delta time.\\\\
+The \textbf{Render} holds the objects responsible for each rendering pass and call them in the correct order binding the appropriate
+framebuffers.
 \begin{lstlisting}[caption={Main rendering loop},captionpos=b]
 // Illumination pass
 glViewport(0, 0, ctx->width, ctx->height);
@@ -314,11 +316,12 @@ if (ctx->showMenu) {
 glfwSwapBuffers(window);
 glfwSwapInterval(ctx->vSync);
 \end{lstlisting}
+
 \subsection{Illumination pass}
-The illumination pass set up the view and projection matrix based as provided by the \textbf{SceneCamera} and then iterate
-every object in the scene setting up its model matrix, its material uniform, binding its texture and drawing its model.\\\\
-The illumination model is Blinn-Phong, as object blends one over each other more sophisticated illumination model give little
-visible difference and so a simple and fast model was preferred for this project.\\\\
+The illumination pass set up the view and projection matrices as provided by the \textbf{SceneCamera} and then iterate
+every objects in the scene setting up its model matrix, its material uniforms, binding its texture and drawing its meshes.\\\\
+The illumination model is Blinn-Phong, as object blends one over each other more sophisticated illumination models give little
+visible differences and so a simple and fast one was preferred for this project.\\\\
 A different subroutine can be called to apply toon shading. This simply use \textbf{step} to quantize the illumination.
 \begin{lstlisting}[caption={Toon shading subroutine version},captionpos=b]
 [...]
@@ -334,7 +337,7 @@ float specular = step(0.2, pow(specAngle, shininess));
 \end{center}
 It is also possible to quantize the color resolution to apply a more cartoonish effect. This can create a lot
 of banding. The result, once the pixel are blended over each other for the stereogram rendering, is still quite nice.\\\\
-During this pass we also save the view space normal on a texture, they will be used for edge detection in the stereogram
+During this pass we also save the view space normals on a texture, they will be used for edge detection in the stereogram
 rendering pass.
 
 \subsection{Skybox pass}
@@ -363,10 +366,10 @@ currCoord.x = mod(currCoord.x, 1.0);
 Using this method we simply need to assign the same color to each texel having the same \textbf{currCoord}.\\\\
 The depth sample from the depth buffer is not linear and should be linearized to have the correct results.
 Sadly autostereogram can provide only a limited range of depth, linearizing this would require to clamp the max depth
-to a really close value. To allow some perception of the depth difference of far away object it was preferred to not linearize
-the depth making close object more visibly 3D while keeping some little 3D effect for far away one. This can be also made even less linear
-as the depth value get changed using an exponential function having as the exponent be GUI setting \textbf{depth strength}. Note that value too high
-cause glitches to close object, while low values reduce the 3D effect.\\\\
+to a really close value. To allow some perception of the depth differences of far away objects it was preferred to not linearize
+the depth making close object more visibly 3D while keeping some little 3D effects for far away one. This can be also made even less linear
+as the depth values get changed using an exponential function having as the exponent be GUI setting \textbf{depth strength}. Note that value too high
+cause glitches to close objects, while low values reduce the 3D effect.\\\\
 To allow the scene color to be used we also store the current texel color in a SSBO as we will discuss later, for this
 reason a second pass is required after a barrier to ensure all data written to the SSBO will be read correctly in the second pass.\\\\
 The value of \textbf{currCoord} will be also needed in the second pass, to avoid computing it again we store it in another SSBO.\\\\
@@ -374,18 +377,18 @@ We also detect if the current texel is a edge and store this information in the 
 
 \subsection{Pattern}
 In the second pass we assign the texel color sampling a pattern based on the value of \textbf{currCoord}.\\\\
-The application support random generated patter with perlin noise, either RGB or grayscale. The perlin noise
+The application supports random generated patter with perlin noise, either RGB or grayscale. The perlin noise
 can also take into account the current frame time to make it animated.\\\\
 Another option that avoid the expensive perlin noise generation is to sample a texture. To animate the texture pattern
 we just move the UV coordinate a bit each frame.\\\\
-The last option is to use an animated texture pattern, in this case for simplicity all frame was placed in a single texture
-and the code sample in the correct position based on the current time. As a pattern texture is only 256x256 pixel having
+The last option is to use an animated texture pattern, in this case for simplicity all frames were placed in a single texture
+and the code samples in the correct position based on the current time. As a pattern texture is only 256x256 pixel having
 64 frames in a texture only requires a 2048x2048 texture that is totally manageable by the GPU.
 
 \subsection{Scene color}
 During the first pass we save the texel color in a SSBO. As many texel will have the same \textbf{currCoord} we will
 need to blend them together and use the average as the final color. This scene color can then be mixed with the color
-generated from the pattern.\\\\
+of the pattern.\\\\
 To average the color, in the first pass, we atomically add each color in the SSBO using the alpha channel as a counter of how many texel
 were added for that value of \textbf{currCoord}. In the second pass we simply divide the RGB channels by the alpha to get the correct values back.
 Note that is possible to do atomic operation only on integer scalar values.
@@ -410,9 +413,9 @@ if (color[i].w != 0) {
 }
 \end{lstlisting}
 In the previous code \textbf{index} is a helper function to get the 1D array index from 2D coordinates.\\\\
-It is also possible to use this alpha as a weight to give different importance to some object in the scene. For example the skybox might have a low weight
+It is also possible to use the alpha as a weight to give different importance to some object in the scene. For example the skybox might have a low weight
 making it bleed over other pixel only if there was no other important object that should bleed over that pixel.
-To have alpha value greater than 1 the FBO color attachment texture should be declared using a not clamped format such as GL\_RGBA32F.
+To have alpha values greater than 1.0 the FBO color attachment texture should be declared using a not clamped format such as GL\_RGBA32F.
 \begin{center}
     \centering
     \includegraphics[width=1.0\textwidth]{img/dance.png}
@@ -424,7 +427,7 @@ Here we can see how the blue of the skybox does not blend with the colors of the
 \subsection{Edge detection}
 To enchant the autostereogram sharpness we can add the object edged to the image.\\\\
 In the first pass we detect the edge using Sobel either on the scene color or on the scene view space normals. The second case give better results 
-but is unable to detect edges in the object texture.\\\\
+but is unable to detect edges in the object textures.\\\\
 Once we have detected the edge we store this information in a SSBO. In the second pass we check if there was an edge in any texel having
 that particular \textbf{currCoord}, if it is the case we render a darker color.
 \begin{center}
@@ -466,22 +469,22 @@ The result is not perfected but greatly improved, mixing with the pattern also h
 \section{Skeletal animation}
 
 \subsection{Linear blend skinning}
-Linear blend skinning code was based on Learn OpenGL implementation. The animation is loaded from the mesh file using assimp.
+Linear blend skinning code was based on Learn OpenGL implementation. The animations are loaded from the mesh files using assimp.
 At each frame we compute the current bone trasformations interpolating between keyframes. To get the correct results rotation
-need to be interpolated using quaternions. The final trasform for each bone is then computed comulating each bone trasform with the base
-trasform of each bone. The final transforms are sent to the GPU as uniform for the vertex shader.\\\\
-To achieve better results blend skinning is used. Each vertex is associated with up to 4 bone
-of the skeleton. For each of these bone there is a weight that encode how much the vertex is affected by that bone.
+need to be interpolated using quaternions. The final trasforms for each bone is then computed cumulating each bone trasform with the base
+trasform of each bone. The final transforms are sent to the GPU as uniforms for the vertex shader.\\\\
+To achieve better results blend skinning is used. Each vertex is associated with up to 4 bones
+of the skeleton. For each of these bones there is a weight that encodes how much the vertex is affected by that bone.
 In the vertex shader we interpolate the bone final transforms with the weights and then apply the result to the vertex to get
 the vertex position in object space.\\\\
 With linear blend skinning we represent the trasformations as matrices and we interpolate linearly between them.
-This approach mostly work, but does not preserve the mesh volume and can lead to some artefacts such as candy wrap.
+This approach mostly works, but does not preserve the mesh volume and can lead to some artefacts such as candy wrap.
 
 \subsection{Dual quaternion skinning}
-An alternative approach that preserve the volumes is dual quaternion skinning. For this we represent the bone final trasformations as dual quaternion
+An alternative approach that preserves the volumes is dual quaternion skinning. For this we represent the bones final trasformations as dual quaternion
 and interpolate between them.\\\\
 Note that dual quaternions can only encode rototraslations and scaling need to be interpolated on his own. While most animation have no need for scaling
-it seem that most animation loaded from various assets have a constant scaling applied to bones.\\\\
+it seems that most animation loaded from various assets have a constant scaling applied to the bones.\\\\
 A dual quaternion is a number in the form:
 \[
     p + \epsilon q \text{ where } p, q \in \mathbb{H}\\\\
@@ -491,7 +494,7 @@ A rototraslations is expressed as a unitary dual quaternion:
 \[
     \|p + \epsilon q\| = 1 \iff \|p\| = 1 \land p \cdot q = 0
 \]
-A rotation around an axis $(x, y, z)$ of an angle $\theta$ is expressed as with normal quaternions:
+A rotation around an axis $(x, y, z)$ of an angle $\theta$ is expressed as with normal quaternion:
 \[
     \cos(\frac{\theta}{2})+\sin(\frac{\theta}{2})(xi + yj + zk)
 \]
@@ -501,7 +504,7 @@ A translation $(x, y, z)$ is expressed as:
 \]
 A point $(x, y, z) \in \mathbb{E}^3$ is expressed as a dual quaternion like this:
 \[
-    1 + \epsilon xi + \epsilon yj + \epsilon zk
+    1 + \epsilon (xi +  yj +  zk)
 \]
 To apply a rototraslation to the point $a$:
 \[
@@ -509,12 +512,12 @@ To apply a rototraslation to the point $a$:
 \]
 To obtain the rotation and the translation expressed by the final transform matrix the method \textbf{glm::decompose} was used.
 The dual quaternion is then computed and sent to the GPU as uniform.\\\\
-In the shader we interpolate the dual quaternion linearly (taking into account the shortest path), normalize the result and then apply the it to the vertex position.
+In the shader we interpolate the dual quaternions linearly (taking into account the shortest path), normalize the result and then apply it to the vertex position.
 To normalize a dual quaternion we first divide both $p$ and $q$ by $\|p\|$ and then subtract from $q$ the value of $(p \cdot q)p$.
 \begin{center}
     \centering
     \includegraphics[width=0.8\textwidth]{img/dq.png}
-    \captionof{figure}{Dual quaternions skinning comparation}
+    \captionof{figure}{Dual quaternions skinning comparison}
 \end{center}
 To calculate the vertex normal we usually need the inverse of the transpose of the transformation matrix. As dual quaternions only encode rototranslation
 we can apply the dual quaternion as it is.
