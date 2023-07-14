@@ -111,16 +111,16 @@
 
 \section{Abstract}
 In this document we discuss the algorithms, the choices and the implementation details of a real-time autostereogram rendering pipeline built with OpenGL 4.3.\\\\
-The pipeline presented allows the rendering of autostereograms starting from a depth buffer that is always produces
-as a result on all classical rasterization rendering algorithms. More elaborated effects can be achieved if we supply as input also the color buffer and 
+The pipeline presented allows the rendering of autostereograms starting from a depth buffer that is always produced
+as a result of all classical rasterization rendering algorithms. More elaborated effects can be achieved if we supply as input also the color buffer and 
 the normal buffer.\\\\
 We will first briefly explain what an autostereogram is and how it works from a psychological point of view. 
-We will then discuss a general algorithm to create them and the implementation detail of the project.\\\\
+We will then discuss a general algorithm to create them and the implementation details of the project.\\\\
 It should be noted that the input needed for the autostereogram generation algorithm are produced as a result of most real-time rendering pipeline and this 
 means that is possible to apply this technique to an already existing rendering pipeline.\\\\
 For this project we use the simple Blinn-Phong illumination model, as we will see more sophisticated model give little gain in 
 the final result.\\\\
-The project also implements blend skinning for skeletal animation, we will discuss the implementation and the differences between linear blend skinning and
+The project also implements blend skinning for skeletal animations, we will discuss the implementation and the differences between linear blend skinning and
 dual quaternion skinning.\\\\
 We will see how the performance of this pipeline can be totally in the frame budget on most GPU, but may suffer on old laptop one while still
 providing 60 frames per second.
@@ -159,12 +159,12 @@ sep = \frac{eyesep \cdot featureZ}{featureZ + obsdist}
 The general method to create an autostereogram is the following\footnote{http://www.techmind.org/stereo/stech.html}:
 \begin{itemize}
     \item Create a depth map of the scene.
-    \item For each horizontal line, moving from left to right, and for each point of the depth map link together all the pixel that will have the same color.
+    \item For each horizontal line, moving from left to right, and for each point of the depth map link together all the pixels that will have the same color.
     \item Assign to each point a random color making sure the linked one will have the same.
 \end{itemize}
 
 \subsection{Advanced effects}
-The choice of which color assign to a pixel allow for different effects.\\\\
+The choice of which color assign to a pixel allows for different effects.\\\\
 It is possible to use a completely random color, but is also possible use a texture pattern that will be repeated horizontally.\\\\
 It is also possible to highlight the edge of the objects or using a color based on the color of the object in the scene.
 \begin{center}
@@ -215,7 +215,7 @@ void main() {
 \end{lstlisting}
 To hide the missing part on right and left
 the buffer was cleared with \textbf{glClear} with the clear color set as the loading screen image background color.\\\\
-The \textbf{SceneManager} also forward the call to the method process to the current loaded scene to allow the scene
+The \textbf{SceneManager} also forwards the call to the method process to the current loaded scene to allow the scene
 to be updated based on the \textbf{deltaTime} that affect objects and animation, and the input received from the user
 that affect the camera position and orientation.
 
@@ -336,7 +336,7 @@ float specular = step(0.2, pow(specAngle, shininess));
     \captionof{figure}{Toon shaded teapot}
 \end{center}
 It is also possible to quantize the color resolution to apply a more cartoonish effect. This can create a lot
-of banding. The result, once the pixel are blended over each other for the stereogram rendering, is still quite nice.\\\\
+of banding. The result, once the pixels are blended over each other for the stereogram rendering, is still quite nice.\\\\
 During this pass we also save the view space normals on a texture, they will be used for edge detection in the stereogram
 rendering pass.
 
@@ -377,9 +377,9 @@ We also detect if the current texel is a edge and store this information in the 
 
 \subsection{Pattern}
 In the second pass we assign the texel color sampling a pattern based on the value of \textbf{currCoord}.\\\\
-The application supports random generated patter with perlin noise, either RGB or grayscale. The perlin noise
+The application supports random generated patter with Perlin noise, either RGB or grayscale. The Perlin noise
 can also take into account the current frame time to make it animated.\\\\
-Another option that avoid the expensive perlin noise generation is to sample a texture. To animate the texture pattern
+Another option that avoid the expensive Perlin noise generation is to sample a texture. To animate the texture pattern
 we just move the UV coordinate a bit each frame.\\\\
 The last option is to use an animated texture pattern, in this case for simplicity all frames were placed in a single texture
 and the code samples in the correct position based on the current time. As a pattern texture is only 256x256 pixel having
@@ -413,7 +413,7 @@ if (color[i].w != 0) {
 }
 \end{lstlisting}
 In the previous code \textbf{index} is a helper function to get the 1D array index from 2D coordinates.\\\\
-It is also possible to use the alpha as a weight to give different importance to some object in the scene. For example the skybox might have a low weight
+It is also possible to use the alpha as a weight to give different importance to some objects in the scene. For example the skybox might have a low weight
 making it bleed over other pixel only if there was no other important object that should bleed over that pixel.
 To have alpha values greater than 1.0 the FBO color attachment texture should be declared using a not clamped format such as GL\_RGBA32F.
 \begin{center}
@@ -494,7 +494,7 @@ A rototraslations is expressed as a unitary dual quaternion:
 \[
     \|p + \epsilon q\| = 1 \iff \|p\| = 1 \land p \cdot q = 0
 \]
-A rotation around an axis $(x, y, z)$ of an angle $\theta$ is expressed as with normal quaternion:
+A rotation around an axis $(x, y, z)$ of an angle $\theta$ is expressed as with normal quaternions:
 \[
     \cos(\frac{\theta}{2})+\sin(\frac{\theta}{2})(xi + yj + zk)
 \]
@@ -512,16 +512,13 @@ To apply a rototraslation to the point $a$:
 \]
 To obtain the rotation and the translation expressed by the final transform matrix the method \textbf{glm::decompose} was used.
 The dual quaternion is then computed and sent to the GPU as uniform.\\\\
-The dual quaternion computation does not use neither \textbf{glm::quat} or \textbf{glm::dualquat}, the first because the multiplication returns a normalized 
-result that is fine when using quaterion for rotation but does not work for dual quaterion operation; the second one because the class is completely lacking
-of any useful methods needed by the application.
+In the shader we interpolate the dual quaternions linearly (taking into account the shortest path), normalize the result and then apply it to the vertex position.
+To normalize a dual quaternion we first divide both $p$ and $q$ by $\|p\|$ and then subtract from $q$ the value of $(p \cdot q)p$.
 \begin{center}
     \centering
     \includegraphics[width=0.8\textwidth]{img/dq.png}
     \captionof{figure}{Dual quaternions skinning comparison}
 \end{center}
-In the shader we interpolate the dual quaternions linearly (taking into account the shortest path), normalize the result and then apply it to the vertex position.
-To normalize a dual quaternion we first divide both $p$ and $q$ by $\|p\|$ and then subtract from $q$ the value of $(p \cdot q)p$.\\\\
 To calculate the vertex normal we usually need the inverse of the transpose of the transformation matrix. As dual quaternions only encode rototranslation
 we can apply the dual quaternion as it is.
 
@@ -555,9 +552,9 @@ As we can see the autostereogram rendering pass is quite taxing on the GPU, it i
 fast enough for real time rendering, especially on modern desktop GPU. 
 
 \section{Conclusion}
-This project shows the potential and the limits of autostereogram real time rendering.
-Performance wise it is fast enough on more recent GPU, but still slow on old desktop GPU and laptop GPU.
-The depth effect have a limited range requiring some setting configuration to achieve the best result in each scene.
+This project shows the potential and the limits of autostereogram real time rendering.\\\\
+Performance wise it is fast enough on more recent GPU, but still slow on old desktop GPU and laptop GPU.\\\\
+The depth effect have a limited range requiring some setting configuration to achieve the best result in each scene.\\\\
 Using the scene color and edge detection improve the visual result but can lead to glitches and rendering artefacts.\\\\
 In the end the 3D effect work nice, but it is subject to many problems and limitation.
 \end{document}
