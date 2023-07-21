@@ -112,9 +112,9 @@
 \section{Abstract}
 In this document we discuss the algorithms, the choices and the implementation details of a real-time autostereogram rendering pipeline built with OpenGL 4.3.\\\\
 The pipeline presented allows the rendering of autostereograms starting from a depth buffer that is always produced
-as a result of all classical rasterization rendering algorithms. More elaborated effects can be achieved if we supply as input also the color buffer and 
+as a result of every classical rasterization rendering algorithms. More elaborated effects can be achieved if we supply as input also the color buffer and 
 the normal buffer.\\\\
-We will first briefly explain what an autostereogram is and how it works from a psychological point of view. 
+We will briefly explain what an autostereogram is and how it works from a psychological point of view. 
 We will then discuss a general algorithm to create them and the implementation details of the project.\\\\
 It should be noted that the input needed for the autostereogram generation algorithm are produced as a result of most real-time rendering pipeline and this 
 means that is possible to apply this technique to an already existing rendering pipeline.\\\\
@@ -127,15 +127,15 @@ providing 60 frames per second.
 
 \clearpage
 \section{Autostereogram}
-\subsection{What is an autostereogram}
+\subsection{What an autostereogram is}
 A stereogram is a 2D image that creates the optical illusion of a 3D scene\footnote{https://en.wikipedia.org/wiki/Autostereogram}.
 Autostereograms are a particular kind of stereograms
 that creates this illusion without requiring any additional equipment.\\\\
 Our brain is able to perceive depth as each eye receives a different image because they are in slightly different positions on one's head.
-We can exploit this behavior by producing one image with repeating patter causing an object to be in the right position from the point of view of each eye
+We can exploit this mechanism by producing one image with repeating pattern causing an object to be in the right position from the point of view of each eye
 if the eye separation of the subject is the correct one.\\\\
-Note that it might take some practice before being able to control the eye separation and be able to see
-the optical illusion. For more information on some viewing techniques one may take a look at: \url{https://www.hidden-3d.com/how_to_view_stereogram.php}.\\\\
+Note that it might take some practice before being able to control the eye convergence and be able to see
+the optical illusion. For more information on some viewing techniques one may visit: \url{https://www.hidden-3d.com/how_to_view_stereogram.php}.\\\\
 \begin{center}
     \centering
     \includegraphics[width=1.0\textwidth]{img/shark.png}
@@ -151,7 +151,7 @@ To render an autostereogram we need first to understand the underling geometry.\
 \end{center}
 If the two points where the line of sight intercept the screen have the same color the depth of the 3D
 subject will be perceived.\\\\
-As we can see from the figure the two highlighted triangles have the same angles and as such they are similar.
+As we can see from the figure the two highlighted triangles have the same angles.
 This means they are proportional, and so we can calculate the separation with the following equation.
 \[
 sep = \frac{eyesep \cdot featureZ}{featureZ + obsdist}
@@ -179,7 +179,7 @@ The project requires different scenes to be loaded when selected from the GUI.\\
 To achieve this the class \textbf{SceneManager} is responsible for loading the correct scene and unloading the old one
 freeing any no longed used resources.\\\\
 The \textbf{SceneManager} class holds a polymorphic pointer to a class \textbf{Scene}, when asked to load a new one
-the current one is deleted and the old one is instanced creating a subclass of type \textbf{Scene}.\\\\
+the current one is deleted and the new one is instanced creating an object of a subclass of \textbf{Scene}.\\\\
 This means there is a subclass of \textbf{Scene} for every scene in the project. This method in general does not
 scale well, but for a project of this size loading a scene specification from an asset file was considered overengineering.
 It should be noted that if the scene was loaded from a file we could not use the polymorphic nature of the class
@@ -240,9 +240,9 @@ struct Object {
     GLfloat alphaMultiplier = 1.0;
 
     glm::vec3 specularColor = glm::vec3(1.0);
-    float shininess = 500.0;
-    float diffuseFactor = 1.0;
-    float specularFactor = 0.4;
+    GLfloat shininess = 500.0;
+    GLfloat diffuseFactor = 1.0;
+    GLfloat specularFactor = 0.4;
 };
 \end{lstlisting}
 The rotation is expressed as Euler angles. This is not the best representation for rotation in video games and quaternion
@@ -279,7 +279,7 @@ The GUI menu was build with \textbf{ImGUI}. The class \textbf{GUI} is responsibl
 \end{center}
 The variables affected by the GUI are placed in a struct \textbf{Context} that is created in the \textbf{main} and
 passed as a pointer to most objects in the application. This avoids proliferation of global variables for data 
-that need to be shader across multiple objects.
+that need to be shared across multiple objects.
 
 \section{Classical rendering}
 \subsection{Rendering class}
@@ -350,7 +350,7 @@ is used for the stereogram pass to achieve some advanced effects.
 \section{Autostereogram rendering}
 \subsection{Main algorithm}
 The autostereogram rendering is executed in 2 passes each one rendering a fullscreen quad.\\\\
-In the first pass we sample the depth buffer from the current texel moving to the left border to link
+In the first pass we sample the depth buffer from the current texel position moving to the left border to link
 all the texel that will need to have the same color in the final rendering.
 \begin{lstlisting}[caption={Autostereogram depth sampling},captionpos=b]
 vec2 currCoord = uv;
@@ -364,8 +364,8 @@ for(int i = 0; i < 32; i++) {
 currCoord.x = mod(currCoord.x, 1.0);
 \end{lstlisting}
 Using this method we simply need to assign the same color to each texel having the same \textbf{currCoord}.\\\\
-The depth sample from the depth buffer is not linear and should be linearized to have the correct results.
-Sadly autostereogram can provide only a limited range of depth, linearizing this would require to clamp the max depth
+The depth sampled from the depth buffer is not linear and should be linearized to get the correct results.
+Sadly autostereogram can provide only a limited range of depth illusion, linearizing this would require to clamp the max depth
 to a really close value. To allow some perception of the depth differences of far away objects it was preferred to not linearize
 the depth making close object more visibly 3D while keeping some little 3D effects for far away one. This can be also made even less linear
 as the depth values get changed using an exponential function having as the exponent be GUI setting \textbf{depth strength}. Note that value too high
@@ -496,7 +496,7 @@ A rototraslations is expressed as a unitary dual quaternion:
 \]
 A rotation around an axis $(x, y, z)$ of an angle $\theta$ is expressed as with normal quaternions:
 \[
-    \cos(\frac{\theta}{2})+\sin(\frac{\theta}{2})(xi + yj + zk)
+    \cos\left(\frac{\theta}{2}\right)+\sin\left(\frac{\theta}{2}\right)(xi + yj + zk)
 \]
 A translation $(x, y, z)$ is expressed as:
 \[
